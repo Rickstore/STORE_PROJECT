@@ -1,0 +1,94 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Catégories | AUDSTOREsarl{% endblock %}
+{% block page_title %}Gestion des Catégories{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Add Category Form -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-6">
+            <div class="p-5 border-b border-gray-50">
+                <h2 class="font-bold text-gray-900 text-sm">Ajouter une Catégorie</h2>
+            </div>
+            <form method="post" enctype="multipart/form-data" class="p-5 space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Nom</label>
+                    {{ form.name }}
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Description</label>
+                    {{ form.description }}
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Image de couverture</label>
+                    {{ form.image }}
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-gray-800 transition-colors">
+                    Ajouter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category List -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-50">
+                <h2 class="font-bold text-gray-900 text-sm">Liste des Catégories</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-50 text-[10px] text-gray-400 font-bold uppercase tracking-widest bg-gray-50/50">
+                            <th class="px-5 py-3 text-left">Nom</th>
+                            <th class="px-5 py-3 text-left">Slug</th>
+                            <th class="px-5 py-3 text-center">Produits</th>
+                            <th class="px-5 py-3 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        {% for cat in categories %}
+                        <tr class="hover:bg-gray-50/20">
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 uppercase text-gray-400 font-bold text-xs">
+                                        {% if cat.image %}
+                                            <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <i class="fa-solid {{ cat.icon }} text-lg"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="font-bold text-gray-900">{{ cat.name }}</div>
+                                </div>
+                            </td>
+                            <td class="px-5 py-4 text-gray-500 font-mono text-xs">{{ cat.slug }}</td>
+                            <td class="px-5 py-4 text-center font-bold text-gray-700">{{ cat.products.count }}</td>
+                            <td class="px-5 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <a href="{% url 'dashboard:category_edit' cat.id %}" class="text-blue-500 hover:text-blue-700 px-2 py-1">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                    <form method="post" class="inline" onsubmit="return confirm('Attention : suppression irrémédiable. Confirmer ?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="category_id" value="{{ cat.id }}">
+                                        <button type="submit" class="text-red-500 hover:text-red-700 px-2 py-1 transition-opacity {% if cat.products.exists %}opacity-30 cursor-not-allowed{% endif %}" {% if cat.products.exists %}onclick="alert('Impossible de supprimer : cette catégorie contient encore des produits. Déplacez-les d\'abord.'); return false;"{% endif %}>
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

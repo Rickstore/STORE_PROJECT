@@ -1,0 +1,312 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}{{ action_title }} | AUDSTOREsarl{% endblock %}
+{% block page_title %}{{ action_title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-50 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-900">Informations du Produit</h2>
+            <a href="{% url 'dashboard:products' %}" class="text-sm font-semibold text-gray-500 hover:text-gray-700">Annuler</a>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom du Produit</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="text-red-500 text-[10px] mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Catégorie</label>
+                    {{ form.category }}
+                </div>
+
+                <!-- Brand -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Marque</label>
+                    {{ form.brand }}
+                </div>
+
+                <!-- Price -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Prix (FCFA)</label>
+                    {{ form.price }}
+                </div>
+
+                <!-- Stock -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stock Initial</label>
+                    {{ form.stock }}
+                </div>
+
+                <!-- Description -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
+                    {{ form.description }}
+                </div>
+
+                <!-- Image -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Image du Produit</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-200 border-dashed rounded-xl hover:border-[#8CC63F] transition-colors">
+                        <div class="space-y-1 text-center">
+                            <i class="fa-solid fa-image text-gray-300 text-3xl mb-3"></i>
+                            <div class="flex text-sm text-gray-600">
+                                {{ form.image }}
+                            </div>
+                            <p class="text-xs text-gray-400">PNG, JPG up to 10MB</p>
+                        </div>
+                    </div>
+                    {% if object.image %}
+                    <div class="mt-3 flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                        <img src="{{ object.image.url }}" class="w-12 h-12 rounded object-cover">
+                        <span class="text-xs text-gray-500">Image actuelle</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Colors & Capacities -->
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl border border-gray-100 relative">
+                    <a href="{% url 'dashboard:attributes' %}" class="absolute top-4 right-4 text-[10px] bg-white border border-gray-200 px-2 py-1 rounded-md text-gray-500 hover:text-[#8CC63F] hover:border-[#8CC63F] font-bold transition-all" target="_blank">
+                        <i class="fa-solid fa-plus mr-1"></i> Gérer les attributs
+                    </a>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Couleurs Disponibles</label>
+                        <div class="flex flex-wrap gap-4">
+                            {{ form.available_colors }}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Capacités Disponibles</label>
+                        <div class="flex flex-wrap gap-4">
+                            {{ form.available_capacities }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Variants (Stock & Price per Combination) -->
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <h3 class="text-sm font-bold text-gray-900">Variantes du Produit (Prix & Stock par option)</h3>
+                        <button type="button" id="add-variant" class="text-xs bg-[#8CC63F] text-white px-3 py-1.5 rounded-lg hover:bg-[#7ab32f] transition-colors font-bold">
+                            <i class="fa-solid fa-plus mr-1"></i> Ajouter une variante
+                        </button>
+                    </div>
+                    
+                    {{ variants.management_form }}
+                    <div id="variants-container" class="space-y-3">
+                        {% for v_form in variants %}
+                        <div class="variant-form-row grid grid-cols-1 md:grid-cols-10 gap-3 items-end p-4 bg-white border border-gray-100 rounded-xl">
+                            {% for hidden in v_form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                            <div class="md:col-span-3">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Couleur</label>
+                                {{ v_form.color }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Capacité</label>
+                                {{ v_form.capacity }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Prix (FCFA)</label>
+                                {{ v_form.price }}
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Stock</label>
+                                {{ v_form.stock }}
+                            </div>
+                            <div class="md:col-span-1 text-center pb-2">
+                                {% if v_form.instance.pk %}
+                                    <div class="flex flex-col items-center">
+                                        {{ v_form.DELETE }}
+                                        <span class="text-[9px] text-red-400 font-bold uppercase mt-1">Suppr.</span>
+                                    </div>
+                                {% else %}
+                                    <button type="button" class="remove-row text-red-300 hover:text-red-500">
+                                        <i class="fa-solid fa-circle-xmark"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p class="text-[10px] text-gray-400 italic">Note: Le prix et le stock ci-dessus remplacent les valeurs générales si une variante est sélectionnée par le client.</p>
+                </div>
+
+                <!-- Dynamic Specifications -->
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <h3 class="text-sm font-bold text-gray-900">Spécifications Techniques</h3>
+                        <button type="button" id="add-spec" class="text-xs bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors font-bold">
+                            <i class="fa-solid fa-plus mr-1"></i> Ajouter une ligne
+                        </button>
+                    </div>
+                    
+                    {{ specifications.management_form }}
+                    <div id="specs-container" class="space-y-3">
+                        {% for spec_form in specifications %}
+                        <div class="spec-form-row grid grid-cols-1 md:grid-cols-7 gap-3 items-center p-3 bg-white border border-gray-100 rounded-xl relative">
+                            {% for hidden in spec_form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                            <div class="md:col-span-3">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nom (ex: Batterie)</label>
+                                {{ spec_form.name }}
+                            </div>
+                            <div class="md:col-span-3">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Valeur (ex: 5000mAh)</label>
+                                {{ spec_form.value }}
+                            </div>
+                            <div class="md:col-span-1 pt-4 text-center">
+                                {% if specifications.can_delete %}
+                                    <div class="flex items-center gap-2">
+                                        {{ spec_form.DELETE }}
+                                        <span class="text-[10px] text-red-400 font-bold uppercase">Suppr.</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flex items-center gap-2 p-4 bg-[#8CC63F]/5 rounded-xl border border-[#8CC63F]/10">
+                        {{ form.is_active }}
+                        <label for="{{ form.is_active.id_for_label }}" class="text-sm font-bold text-gray-700">Produit actif</label>
+                    </div>
+                    <div class="flex items-center gap-2 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        {{ form.is_second_hand }}
+                        <label for="{{ form.is_second_hand.id_for_label }}" class="text-sm font-bold text-blue-700">Seconde Main</label>
+                    </div>
+                    <div class="flex items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100">
+                        {{ form.fast_deal }}
+                        <label for="{{ form.fast_deal.id_for_label }}" class="text-sm font-bold text-orange-700">Fast Deal</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-50">
+                <button type="submit" class="w-full bg-[#8CC63F] hover:bg-[#7ab32f] text-black font-black py-4 rounded-xl shadow-lg shadow-[#8CC63F]/20 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Enregistrer le Produit & Spécifications
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Universal function to add row to formsets
+        function setupFormset(addBtnId, containerId, totalFormsId, rowClass) {
+            const addBtn = document.getElementById(addBtnId);
+            const container = document.getElementById(containerId);
+            const totalForms = document.getElementById(totalFormsId);
+            
+            if (!addBtn || !container || !totalForms) return;
+
+            addBtn.addEventListener('click', function() {
+                const currentCount = parseInt(totalForms.value);
+                const rows = container.querySelectorAll('.' + rowClass);
+                const template = rows[rows.length - 1].cloneNode(true);
+                
+                const prefix = totalFormsId.split('-')[0].replace('id_', '');
+
+                // Clear inputs and update IDs/Names
+                template.querySelectorAll('input, select, textarea').forEach(input => {
+                    input.value = '';
+                    if (input.type === 'checkbox') input.checked = false;
+                    
+                    const nameRegex = new RegExp(`${prefix}-\\d+-`, 'g');
+                    const idRegex = new RegExp(`id_${prefix}-\\d+-`, 'g');
+
+                    if (input.name) input.name = input.name.replace(nameRegex, `${prefix}-${currentCount}-`);
+                    if (input.id) input.id = input.id.replace(idRegex, `id_${prefix}-${currentCount}-`);
+                });
+                
+                // Update labels
+                template.querySelectorAll('label').forEach(label => {
+                    const forAttr = label.getAttribute('for');
+                    if (forAttr) {
+                        const idRegex = new RegExp(`id_${prefix}-\\d+-`, 'g');
+                        label.setAttribute('for', forAttr.replace(idRegex, `id_${prefix}-${currentCount}-`));
+                    }
+                });
+
+                // Remove logic for new rows
+                const deleteSection = template.querySelector('.text-center');
+                if (deleteSection) {
+                    deleteSection.innerHTML = `
+                        <button type="button" class="remove-row text-red-300 hover:text-red-500">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    `;
+                    deleteSection.querySelector('.remove-row').addEventListener('click', function() {
+                        template.remove();
+                        // Optional: decrease totalForms.value but Django FormSet usually expects continuous indexing or specific management. Better just leave it or handle it carefully.
+                    });
+                }
+
+                container.appendChild(template);
+                totalForms.value = currentCount + 1;
+            });
+
+            // Delegate delete for new rows already present (extra=1)
+            container.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-row')) {
+                    const row = e.target.closest('.' + rowClass);
+                    const rows = container.querySelectorAll('.' + rowClass);
+                    if (rows.length > 1) {
+                        row.remove();
+                    }
+                }
+            });
+        }
+
+        setupFormset('add-spec', 'specs-container', 'id_specifications-TOTAL_FORMS', 'spec-form-row');
+        setupFormset('add-variant', 'variants-container', 'id_variants-TOTAL_FORMS', 'variant-form-row');
+    });
+</script>
+<style>
+    /* Styling for checkboxes in Grid */
+    ul#id_available_colors, ul#id_available_capacities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    ul#id_available_colors li, ul#id_available_capacities li {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid #f3f4f6;
+        font-size: 0.825rem;
+        font-weight: 600;
+        color: #374151;
+        transition: all 0.2s;
+    }
+    ul#id_available_colors li:hover, ul#id_available_capacities li:hover {
+        border-color: #8CC63F;
+        background: #8CC63F08;
+    }
+    input[type="checkbox"] {
+        accent-color: #8CC63F;
+        width: 1rem;
+        height: 1rem;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

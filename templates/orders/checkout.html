@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Validation de commande | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Finaliser la commande</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Informations de Checkout -->
+        <div class="md:col-span-2">
+            <form action="{% url 'orders:checkout' %}" method="post" id="checkout-form">
+                {% csrf_token %}
+                
+                <!-- Type de Livraison -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">1. Mode de réception</h2>
+                    
+                    <div class="space-y-4">
+                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="delivery_type" value="delivery" class="text-brand-green focus:ring-brand-green h-4 w-4" checked onchange="toggleDeliveryOptions('delivery')">
+                            <div class="ml-3">
+                                <span class="font-bold text-gray-900">Livraison à domicile</span>
+                                <span class="block text-xs text-brand-green font-bold">+ 1 000 FCFA de frais</span>
+                            </div>
+                        </label>
+                        <label class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="delivery_type" value="pickup" class="text-brand-green focus:ring-brand-green h-4 w-4" onchange="toggleDeliveryOptions('pickup')">
+                            <span class="ml-3 font-medium text-gray-900">Retrait en magasin</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Détails Livraison -->
+                <div id="delivery-details" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">2. Adresse de livraison</h2>
+                    
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700">Ville *</label>
+                            <input type="text" name="city" id="city" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border">
+                        </div>
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700">Adresse complète *</label>
+                            <textarea name="address" id="address" rows="3" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Quartier, rue, repère..."></textarea>
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">Téléphone *</label>
+                            <input type="tel" name="phone" id="phone" value="{{ user.phone }}" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Détails Retrait -->
+                <div id="pickup-details" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 hidden">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">2. Sélection du magasin</h2>
+                    
+                    <div>
+                        <label for="store_id" class="block text-sm font-medium text-gray-700 mb-2">Choisissez un point de retrait :</label>
+                        <select name="store_id" id="store_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm rounded-md border">
+                            {% for store in stores %}
+                                <option value="{{ store.id }}">{{ store.name }} - {{ store.city }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Paiement -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">3. Mode de paiement</h2>
+                    
+                    <!-- Options de paiement -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                        <!-- Orange Money -->
+                        <label class="flex justify-center flex-col items-center p-4 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 relative">
+                            <div class="flex items-center w-full justify-center">
+                                <input type="radio" name="provider" value="orange" class="text-orange-500 focus:ring-orange-500 h-4 w-4" checked onchange="togglePaymentFields('orange')">
+                                <span class="ml-3 font-bold text-orange-600">Orange Money</span>
+                            </div>
+                        </label>
+                        <!-- MTN MoMo -->
+                        <label class="flex justify-center flex-col items-center p-4 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 relative">
+                            <div class="flex items-center w-full justify-center">
+                                <input type="radio" name="provider" value="mtn" class="text-yellow-500 focus:ring-yellow-500 h-4 w-4" onchange="togglePaymentFields('mtn')">
+                                <span class="ml-3 font-bold text-gray-800">MTN MoMo</span>
+                            </div>
+                        </label>
+                        <!-- Paiement à la livraison -->
+                        <label class="flex justify-center flex-col items-center p-4 border border-green-200 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 relative">
+                            <div class="flex items-center w-full justify-center">
+                                <input type="radio" name="provider" value="cash" class="text-green-600 focus:ring-green-600 h-4 w-4" onchange="togglePaymentFields('cash')">
+                                <span class="ml-2 font-bold text-green-700">À la livraison</span>
+                            </div>
+                            <span class="text-[10px] text-green-600 font-semibold mt-1">Paiement en espèces</span>
+                        </label>
+                    </div>
+
+                    <!-- Orange Money Field -->
+                    <div id="orange-field" class="mb-4">
+                        <label for="payment_phone" class="block text-sm font-medium text-gray-700">Numéro Orange Money *</label>
+                        <input type="tel" name="payment_phone" id="payment_phone" value="{{ user.phone }}" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Ex: 69XXXXXXX">
+                        <p class="mt-1 text-xs text-gray-500">Un popup s'affichera sur votre téléphone pour confirmer la transaction via l'API.</p>
+                    </div>
+
+                    <!-- MTN Instructions -->
+                    <div id="mtn-instructions" class="hidden mb-4 p-4 bg-[#FFCC00]/10 border border-[#FFCC00] rounded-lg">
+                        <p class="font-bold text-gray-800 text-center text-lg">
+                            <i class="fa-solid fa-mobile-screen-button text-[#FFCC00] mr-2"></i>
+                            Paiement via <span class="text-xl mx-1 font-black underline">677680366</span> (MTN)
+                        </p>
+                        <p class="text-sm text-center text-gray-600 mt-2">Veuillez effectuer le dépôt sur ce numéro, puis entrer le numéro depuis lequel vous avez effectué l'opération ci-dessous.</p>
+                        <div class="mt-4">
+                             <label for="mtn_phone" class="block text-sm font-medium text-gray-700">Numéro MTN de la transaction *</label>
+                             <input type="tel" name="mtn_phone" id="mtn_phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Ex: 67XXXXXXX">
+                        </div>
+                    </div>
+
+                    <!-- Cash on Delivery Notice -->
+                    <div id="cash-notice" class="hidden mb-4">
+                        <div class="p-5 bg-green-50 border border-green-200 rounded-xl flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-hand-holding-dollar text-green-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-green-800 text-base mb-1">Paiement en espèces à la livraison</p>
+                                <p class="text-sm text-green-700 leading-relaxed">
+                                    Votre livreur passera encaisser le montant total en cash lors de la livraison.
+                                    Préparez l'exact si possible. Le livreur vous demandera de signer pour confirmer la réception.
+                                </p>
+                                <div class="mt-3 inline-flex items-center gap-2 bg-green-100 text-green-800 text-xs font-bold px-3 py-1.5 rounded-full">
+                                    <i class="fa-solid fa-circle-check"></i> Aucune préparation nécessaire maintenant
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" id="pay-btn" class="w-full sm:w-auto flex justify-center py-3 px-8 border border-transparent rounded-md shadow-sm text-lg font-bold text-white bg-brand-green hover:bg-[#7ab32f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green">
+                        Payer {{ cart.get_total_price|add:1000 }} FCFA
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Résumé Commande -->
+        <div class="md:col-span-1 border-gray-200 border-l pl-0 md:pl-8 mt-8 md:mt-0">
+            <div class="bg-gray-50 rounded-lg p-6 sticky top-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4 border-b pb-2">Résumé</h3>
+                
+                <ul class="divide-y divide-gray-200 mb-6">
+                    {% for item in cart %}
+                    <li class="py-3 flex justify-between">
+                        <div class="truncate pr-2">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ item.product.name }}</p>
+                            <p class="text-xs text-gray-500">Qté: {{ item.quantity }}</p>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900 whitespace-nowrap">{{ item.total_price }} FCFA</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="border-t border-gray-200 pt-4">
+                    <div class="flex justify-between items-center mb-1 text-sm text-gray-500">
+                        <span>Sous-total</span>
+                        <span>{{ cart.get_total_price }} FCFA</span>
+                    </div>
+                    <div id="summary-delivery-fee" class="flex justify-between items-center mb-4 text-sm text-brand-green font-bold">
+                        <span>Frais de livraison</span>
+                        <span>1 000 FCFA</span>
+                    </div>
+                    <div class="flex justify-between items-center border-t pt-4">
+                        <span class="text-base font-bold text-gray-900">Total final</span>
+                        <span id="final-total" class="text-2xl font-black text-brand-green">{{ cart.get_total_price|add:1000 }} FCFA</span>
+                    </div>
+                </div>
+
+                <!-- Badge paiement à la livraison -->
+                <div id="cash-badge" class="hidden mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center">
+                    <i class="fa-solid fa-truck text-green-600 mr-2"></i>
+                    <span class="text-xs font-bold text-green-700">Paiement encaissé à la livraison</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const baseTotal = parseInt("{{ cart.get_total_price }}");
+
+    function toggleDeliveryOptions(type) {
+        const deliverySection = document.getElementById('delivery-details');
+        const pickupSection = document.getElementById('pickup-details');
+        const cityInput = document.getElementById('city');
+        const addressInput = document.getElementById('address');
+        const storeInput = document.getElementById('store_id');
+        const feeSection = document.getElementById('summary-delivery-fee');
+        const finalTotalDisplay = document.getElementById('final-total');
+        const payBtn = document.getElementById('pay-btn');
+        const isCash = document.querySelector('input[name="provider"]:checked')?.value === 'cash';
+
+        if (type === 'delivery') {
+            deliverySection.classList.remove('hidden');
+            pickupSection.classList.add('hidden');
+            feeSection.classList.remove('hidden');
+            finalTotalDisplay.innerText = (baseTotal + 1000) + " FCFA";
+            if (!isCash) payBtn.innerText = "Payer " + (baseTotal + 1000) + " FCFA";
+            else payBtn.innerText = "Confirmer la commande (" + (baseTotal + 1000) + " FCFA à la livraison)";
+            cityInput.required = true;
+            addressInput.required = true;
+            storeInput.required = false;
+        } else {
+            deliverySection.classList.add('hidden');
+            pickupSection.classList.remove('hidden');
+            feeSection.classList.add('hidden');
+            finalTotalDisplay.innerText = baseTotal + " FCFA";
+            if (!isCash) payBtn.innerText = "Payer " + baseTotal + " FCFA";
+            else payBtn.innerText = "Confirmer la commande (" + baseTotal + " FCFA à la livraison)";
+            cityInput.required = false;
+            addressInput.required = false;
+            storeInput.required = true;
+        }
+    }
+
+    function togglePaymentFields(provider) {
+        const orangeField = document.getElementById('orange-field');
+        const mtnInstructions = document.getElementById('mtn-instructions');
+        const cashNotice = document.getElementById('cash-notice');
+        const cashBadge = document.getElementById('cash-badge');
+        const paymentPhone = document.getElementById('payment_phone');
+        const mtnPhone = document.getElementById('mtn_phone');
+        const payBtn = document.getElementById('pay-btn');
+        const isDelivery = document.querySelector('input[name="delivery_type"]:checked')?.value === 'delivery';
+        const currentTotal = isDelivery ? baseTotal + 1000 : baseTotal;
+
+        // Reset all
+        orangeField.classList.add('hidden');
+        mtnInstructions.classList.add('hidden');
+        cashNotice.classList.add('hidden');
+        cashBadge.classList.add('hidden');
+        paymentPhone.required = false;
+        mtnPhone.required = false;
+
+        if (provider === 'orange') {
+            orangeField.classList.remove('hidden');
+            paymentPhone.required = true;
+            payBtn.innerText = "Payer " + currentTotal + " FCFA";
+        } else if (provider === 'mtn') {
+            mtnInstructions.classList.remove('hidden');
+            mtnPhone.required = true;
+            payBtn.innerText = "Payer " + currentTotal + " FCFA";
+        } else if (provider === 'cash') {
+            cashNotice.classList.remove('hidden');
+            cashBadge.classList.remove('hidden');
+            payBtn.innerText = "Confirmer la commande (" + currentTotal + " FCFA à la livraison)";
+        }
+    }
+</script>
+{% endblock %}

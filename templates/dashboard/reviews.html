@@ -1,0 +1,123 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Gestion des Avis | AUDSTOREsarl{% endblock %}
+
+{% block page_title %}Modération des Avis Clients{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Filters and Stats -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <a href="?status=all" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {% if not request.GET.status or request.GET.status == 'all' %}bg-green text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">
+                Tous
+            </a>
+            <a href="?status=pending" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {% if request.GET.status == 'pending' %}bg-orange-500 text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">
+                En attente {% if pending_reviews_count %}<span class="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px]">{{ pending_reviews_count }}</span>{% endif %}
+            </a>
+            <a href="?status=approved" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {% if request.GET.status == 'approved' %}bg-green text-white{% else %}bg-white border border-gray-200 text-gray-600 hover:bg-gray-50{% endif %}">
+                Approuvés
+            </a>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100">
+                        <th class="px-6 py-4 font-bold text-gray-700">Client</th>
+                        <th class="px-6 py-4 font-bold text-gray-700">Produit</th>
+                        <th class="px-6 py-4 font-bold text-gray-700">Note</th>
+                        <th class="px-6 py-4 font-bold text-gray-700">Commentaire</th>
+                        <th class="px-6 py-4 font-bold text-gray-700">Date</th>
+                        <th class="px-6 py-4 font-bold text-gray-700">Statut</th>
+                        <th class="px-6 py-4 font-bold text-gray-700 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for review in reviews %}
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-gray-900">{{ review.user.username }}</div>
+                            <div class="text-[10px] text-gray-400">{{ review.user.email }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-gray-600 font-medium">
+                            <a href="{% url 'catalog:product_detail' review.product.slug %}" target="_blank" class="hover:text-green">
+                                {{ review.product.name }}
+                            </a>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex text-yellow-400 text-xs">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= review.rating %}
+                                        <i class="fa-solid fa-star"></i>
+                                    {% else %}
+                                        <i class="fa-regular fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 max-w-xs">
+                            <p class="truncate text-gray-600" title="{{ review.comment }}">{{ review.comment }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500 whitespace-nowrap">
+                            {{ review.created_at|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if review.is_approved %}
+                                <span class="badge status-delivered">Approuvé</span>
+                            {% else %}
+                                <span class="badge status-pending">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right whitespace-nowrap">
+                            <div class="flex justify-end gap-2">
+                                {% if not review.is_approved %}
+                                <form method="post" action="{% url 'dashboard:review_action' review.pk 'approve' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="p-2 text-green hover:bg-green/10 rounded-lg transition-colors" title="Approuver">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'dashboard:review_action' review.pk 'delete' %}" onsubmit="return confirm('Supprimer cet avis ?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-400 italic">
+                            Aucun avis client trouvé.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-center">
+            <div class="flex gap-1">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-white border border-gray-200 rounded text-sm hover:bg-gray-50 transition-colors">Précédent</a>
+                {% endif %}
+                
+                <span class="px-3 py-1 bg-green text-white rounded text-sm font-bold">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="px-3 py-1 bg-white border border-gray-200 rounded text-sm hover:bg-gray-50 transition-colors">Suivant</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

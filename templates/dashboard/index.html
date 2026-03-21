@@ -1,0 +1,208 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Tableau de Bord | AUDSTOREsarl{% endblock %}
+{% block page_title %}Tableau de Bord Analytique{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<!-- Stats Row -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <p class="text-xs font-semibold text-gray-500 mb-3">Revenu Total</p>
+        <p class="text-2xl font-black text-gray-900 leading-none mb-1">{{ total_revenue|floatformat:0 }}</p>
+        <p class="text-xs text-gray-400 font-medium">FCFA</p>
+        <div class="mt-3 text-xs font-bold text-[#8CC63F]">+12.5% <span class="text-gray-400 font-normal">ce mois</span>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <p class="text-xs font-semibold text-gray-500 mb-3">Commandes Totales</p>
+        <p class="text-2xl font-black text-gray-900 leading-none mb-1">{{ total_orders }}</p>
+        <p class="text-xs text-gray-400 font-medium">Aujourd'hui : {{ orders_today }}</p>
+        <div class="mt-3 text-xs font-bold text-[#8CC63F]">+8.2% <span class="text-gray-400 font-normal">ce mois</span>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <p class="text-xs font-semibold text-gray-500 mb-3">Panier Moyen</p>
+        <p class="text-2xl font-black text-gray-900 leading-none mb-1">{{ avg_cart|floatformat:0 }}</p>
+        <p class="text-xs text-gray-400 font-medium">FCFA</p>
+        <div class="mt-3 text-xs font-bold text-[#8CC63F]">+4.1% <span class="text-gray-400 font-normal">ce mois</span>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <p class="text-xs font-semibold text-gray-500 mb-3">Alertes Stock</p>
+        <p
+            class="text-2xl font-black {% if low_stock_count > 0 %}text-orange-600{% else %}text-gray-900{% endif %} leading-none mb-1">
+            {{ low_stock_count }}</p>
+        <p class="text-xs text-gray-400 font-medium">produit(s) critiques</p>
+        <div class="mt-3">
+            <a href="{% url 'dashboard:stock' %}" class="text-xs font-bold text-orange-600 hover:underline">Gérer les
+                stocks</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- Charts + Recent Orders -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    <!-- Sales Trend Chart -->
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm lg:col-span-2">
+        <div class="flex justify-between items-center mb-5">
+            <h2 class="font-bold text-gray-900 text-sm">Tendances des Ventes</h2>
+            <span class="text-xs text-gray-400">6 derniers mois</span>
+        </div>
+        <div class="h-56 relative">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Delivery Performance -->
+    <div class="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <h2 class="font-bold text-gray-900 text-sm mb-4">Performance Livraisons</h2>
+        <div class="space-y-4">
+            <div class="text-center py-3 bg-[#F0F7E6] rounded-lg">
+                <div class="text-2xl font-black text-[#8CC63F]">{{ success_rate|floatformat:1 }}%</div>
+                <div class="text-xs text-gray-500 font-medium mt-1">Livraisons réussies</div>
+            </div>
+            <div class="text-center py-3 bg-red-50 rounded-lg">
+                <div class="text-2xl font-black text-red-500">{{ failed_rate|floatformat:1 }}%</div>
+                <div class="text-xs text-gray-500 font-medium mt-1">Échecs / Retours</div>
+            </div>
+        </div>
+        <div class="mt-4 space-y-2">
+            <div class="flex justify-between text-xs text-gray-600">
+                <span>En attente</span>
+                <span class="font-bold">{{ pending_orders }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-gray-600">
+                <span>Confirmées</span>
+                <span class="font-bold">{{ confirmed_count|default:0 }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders + Top Products -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden lg:col-span-2">
+        <div class="px-5 py-4 border-b border-gray-50 flex justify-between items-center">
+            <h2 class="font-bold text-gray-900 text-sm">Dernières Commandes</h2>
+            <a href="{% url 'dashboard:orders' %}" class="text-xs font-bold text-[#8CC63F] hover:underline">Tout
+                voir</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-50 text-xs text-gray-400 font-semibold uppercase tracking-wider">
+                        <th class="px-5 py-3 text-left">Référence</th>
+                        <th class="px-5 py-3 text-left">Client</th>
+                        <th class="px-5 py-3 text-right">Montant</th>
+                        <th class="px-5 py-3 text-center">Statut</th>
+                        <th class="px-5 py-3 text-center">Paiement</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for order in recent_orders %}
+                    <tr class="hover:bg-gray-50/50">
+                        <td class="px-5 py-3.5 font-mono text-xs text-gray-700 font-semibold">
+                            <a href="{% url 'dashboard:order_detail' order.order_number %}"
+                                class="hover:text-[#8CC63F] hover:underline">{{ order.order_number }}</a>
+                        </td>
+                        <td class="px-5 py-3.5 text-gray-700">{{ order.user.username }}</td>
+                        <td class="px-5 py-3.5 text-right font-bold text-gray-900">{{ order.total|floatformat:0 }} <span
+                                class="font-normal text-gray-400 text-xs">FCFA</span></td>
+                        <td class="px-5 py-3.5 text-center">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </td>
+                        <td class="px-5 py-3.5 text-center">
+                            <span
+                                class="px-2 py-1 rounded-full text-xs font-semibold {% if order.payment_status == 'paid' %}status-paid{% elif order.payment_status == 'failed' %}status-failed{% else %}status-pending{% endif %}">
+                                {{ order.get_payment_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-5 py-8 text-center text-gray-400 text-sm">Aucune commande pour le
+                            moment.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-50">
+            <h2 class="font-bold text-gray-900 text-sm">Top Ventes par Marque</h2>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for item in top_products %}
+            <div class="px-5 py-3.5 hover:bg-gray-50/50">
+                <div class="flex justify-between items-start">
+                    <div class="min-w-0 pr-2">
+                        <p class="text-xs font-bold text-gray-900">{{ item.product__brand|default:"—" }}</p>
+                        <p class="text-xs text-gray-500 truncate">{{ item.product__name }}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="text-xs font-bold text-gray-900">{{ item.total_sales_value|floatformat:0 }}</p>
+                        <p class="text-[10px] text-gray-400">FCFA</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-5 py-6 text-center text-gray-400 text-sm">Aucune vente enregistrée.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    let gradient = ctx.createLinearGradient(0, 0, 0, 224);
+    gradient.addColorStop(0, 'rgba(140,198,63,0.18)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
+            datasets: [{
+                data: [12000, 15000, 14000, 32000, 18000, 45000],
+                borderColor: '#8CC63F', borderWidth: 2.5,
+                backgroundColor: gradient, tension: 0.4,
+                pointRadius: 0, pointHoverRadius: 5,
+                pointBackgroundColor: '#fff', pointBorderColor: '#8CC63F', pointBorderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }, tooltip: {
+                    backgroundColor: '#1A1A1A', padding: 10, displayColors: false,
+                    callbacks: { label: (ctx) => ctx.parsed.y.toLocaleString('fr-FR') + ' FCFA' }
+                }
+            },
+            scales: {
+                x: { grid: { display: false, drawBorder: false }, ticks: { color: '#9CA3AF', font: { size: 11 } } },
+                y: { display: false, min: 0 }
+            },
+            interaction: { intersect: false, mode: 'index' }
+        }
+    });
+</script>
+{% endblock %}

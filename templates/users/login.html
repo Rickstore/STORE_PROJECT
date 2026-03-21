@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Connexion | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- Stylized Brand Logo with Shine -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center p-4 bg-brand-dark rounded-2xl shadow-xl shine-box border border-white/10 group">
+                <div class="w-2 h-8 bg-brand-green mr-3 rounded-full"></div>
+                <span class="text-4xl font-black tracking-tighter text-white">
+                    AUDSTORE<span class="text-brand-green text-sm align-top ml-1">sarl</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="bg-white py-8 px-4 shadow-xl border border-gray-100 sm:rounded-2xl sm:px-10">
+            <h2 class="mt-2 text-center text-2xl font-black text-gray-900 mb-8">Ravi de vous revoir</h2>
+            
+            <form action="{% url 'users:login' %}?next={{ request.GET.next|default:'' }}" method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Adresse email</label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" autocomplete="email" required class="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm" placeholder="exemple@email.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                    <div class="mt-1 relative">
+                        <input id="password" name="password" type="password" required class="appearance-none block w-full px-3 py-3 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-brand-green transition-colors focus:outline-none">
+                            <i id="toggle-password-icon" class="fa-regular fa-eye text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-brand-green hover:bg-[#7ab32f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green transition-all">
+                        Se connecter
+                    </button>
+                </div>
+            </form>
+            
+            <div class="text-right mt-2">
+                <a href="{% url 'users:password_reset' %}" class="text-xs text-gray-500 hover:text-brand-green font-medium">
+                    Mot de passe oublié ?
+                </a>
+            </div>
+            
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
+                    <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-gray-500">Nouveau sur AUDSTORE ?</span></div>
+                </div>
+                <div class="mt-6">
+                    <a href="{% url 'users:register' %}" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all">
+                        Créer un compte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const icon = document.getElementById('toggle-password-icon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

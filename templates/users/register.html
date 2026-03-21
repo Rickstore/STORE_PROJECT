@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Inscription | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- Stylized Brand Logo with Shine -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center p-4 bg-brand-dark rounded-2xl shadow-xl shine-box border border-white/10 group">
+                <div class="w-2 h-8 bg-brand-green mr-3 rounded-full"></div>
+                <span class="text-4xl font-black tracking-tighter text-white">
+                    AUDSTORE<span class="text-brand-green text-sm align-top ml-1">sarl</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="bg-white py-8 px-4 shadow-xl border border-gray-100 sm:rounded-2xl sm:px-10">
+            <h2 class="text-center text-2xl font-black text-gray-900 mb-8">Devenir membre</h2>
+            
+            <form action="{% url 'users:register' %}" method="POST" class="space-y-4">
+                {% csrf_token %}
+
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Nom d'utilisateur *</label>
+                    <input id="username" name="username" type="text" required class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Adresse Email *</label>
+                    <input id="email" name="email" type="email" required class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">Numéro de téléphone *</label>
+                    <input id="phone" name="phone" type="tel" required class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm" placeholder="Ex: 6XXXXXXXX">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe *</label>
+                        <input id="password" name="password" type="password" required class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="password_confirm" class="block text-sm font-medium text-gray-700">Confirmer *</label>
+                        <input id="password_confirm" name="password_confirm" type="password" required class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-brand-green hover:bg-[#7ab32f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-green transition-all">
+                        S'inscrire
+                    </button>
+                </div>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Déjà un compte ? <a href="{% url 'users:login' %}" class="font-medium text-brand-green hover:underline">Connectez-vous</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

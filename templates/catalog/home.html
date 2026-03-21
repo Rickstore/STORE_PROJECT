@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="max-w-7xl mx-auto px-4 mb-16 mt-4">
+    <div class="bg-[#121620] rounded-3xl overflow-hidden shadow-2xl relative flex items-center p-8 md:p-16 min-h-[450px]">
+        
+        <!-- Design elements in background -->
+        <div class="absolute inset-0 z-0">
+            <!-- Simulated multiple phones floating (abstract representation using CSS gradients to match the vibe) -->
+            <div class="absolute right-0 top-0 w-2/3 h-full overflow-hidden opacity-90 transform skew-x-[-10deg] translate-x-32 origin-bottom-right">
+                <div class="w-[300px] h-[600px] bg-gradient-to-tr from-[#3a5a1a] to-[#8CC63F] rounded-[40px] absolute -top-20 right-20 transform rotate-12 shadow-2xl border-4 border-[#2a303a]"></div>
+                <div class="w-[280px] h-[580px] bg-gradient-to-tr from-[#1a2a1a] to-[#3a5a1a] rounded-[40px] absolute top-10 right-80 transform -rotate-6 shadow-2xl border-4 border-[#2a303a]"></div>
+            </div>
+            <!-- Glow effect -->
+            <div class="absolute rounded-full w-96 h-96 bg-brand-green opacity-20 blur-[100px] top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+        </div>
+
+        <!-- Text Content -->
+        <div class="relative z-10 max-w-xl text-left">
+            <span class="inline-block bg-[#1a2d10] text-brand-green text-xs font-bold px-3 py-1 rounded-full border border-[#2a4d1a] mb-6 tracking-wider uppercase">Promotion Exceptionnelle</span>
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-[1.1] tracking-tight">
+                Les derniers flagships au meilleur prix
+            </h1>
+            <p class="text-base text-gray-300 mb-8 max-w-md font-medium leading-relaxed">
+                Découvrez nos offres exclusives sur l'iPhone 15 Pro et le Samsung S24.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a href="{% url 'catalog:catalog' %}" class="bg-brand-green hover:bg-[#7ab32f] text-black font-bold py-3.5 px-8 rounded-md shadow-lg transition-all transform hover:scale-105 active:scale-95">
+                    Acheter Maintenant
+                </a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'catalog:catalog' %}" class="bg-transparent border border-gray-600 hover:border-gray-400 text-white font-bold py-3.5 px-8 rounded-md transition-all">
+                        Voir tout
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shop by Category -->
+<div class="max-w-7xl mx-auto px-4 mb-20">
+    <div class="flex items-center mb-8">
+        <div class="w-4 h-4 bg-brand-green shrink-0 [clip-path:polygon(50%_0%,0%_100%,100%_100%)] mr-3"></div>
+        <h2 class="text-xl font-bold text-gray-900">Parcourir par catégorie</h2>
+    </div>
+    
+    <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-3 sm:gap-4">
+        {% for category in categories %}
+        <a href="{% url 'catalog:catalog' %}?category={{ category.slug }}" class="group relative rounded-2xl overflow-hidden aspect-square shadow-sm hover:shadow-xl transition-all">
+            {% if category.image %}
+                <img src="{{ category.image.url }}" 
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+            {% else %}
+                <img src="{% if category.slug == 'smartphones' %}{% static 'images/categories/smartphones.png' %}{% elif category.slug == 'tablettes' %}{% static 'images/categories/tablettes.png' %}{% elif category.slug == 'montres-connectees' %}{% static 'images/categories/montres.png' %}{% elif category.slug == 'pochettes-coques' %}{% static 'images/categories/pochettes.png' %}{% elif category.slug == 'ecouteurs-audio' %}{% static 'images/categories/ecouteurs.png' %}{% else %}{% static 'images/categories/smartphones.png' %}{% endif %}" 
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    onerror="this.src='{% static 'images/categories/smartphones.png' %}'">
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-3 left-3 right-3">
+                <p class="text-white font-bold text-sm leading-tight">{{ category.name }}</p>
+                <div class="w-6 h-0.5 bg-brand-green mt-1.5 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Featured Brands Section Removed -->
+
+<!-- Trending Now -->
+<div class="max-w-7xl mx-auto px-4 mb-12">
+    <div class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4">
+        <h2 class="text-2xl font-black text-gray-900 tracking-tight">Tendances du Moment</h2>
+        <a href="{% url 'catalog:catalog' %}" class="text-brand-green hover:underline text-sm font-bold flex items-center">
+            Voir tout <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {% for product in featured_products|slice:":10" %}
+            {% include 'components/product_card.html' with product=product %}
+        {% empty %}
+             <div class="bg-white dark:bg-[#1E1E1E] rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-white/5 relative group flex flex-col h-full col-span-1">
+                <div class="relative w-full pt-[100%] bg-gray-50 dark:bg-black/20 flex items-center justify-center p-6"><i class="fa-solid fa-mobile text-6xl text-gray-300 dark:text-gray-700 absolute mt-[-20px]"></i></div>
+                <div class="p-4 flex flex-col flex-grow text-center">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">AUDSTORE</p>
+                    <h3 class="font-bold text-gray-900 dark:text-gray-100 text-[13px] mb-1">Nouveautés à venir</h3>
+                    <div class="mt-auto">
+                        <span class="font-black text-sm text-gray-900 dark:text-white">Bientôt disponible</span>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ⚡ Fast Deal — Seconde Main -->
+{% if fast_deal_products %}
+<div class="max-w-7xl mx-auto px-4 mb-16">
+    <!-- Header with badge -->
+    <div class="flex justify-between items-end mb-6 pb-4 border-b border-orange-200 dark:border-orange-900/30">
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <span class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-rose-500 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-md shadow-orange-500/30 uppercase tracking-wider animate-pulse">
+                    <i class="fa-solid fa-bolt text-[10px]"></i>Fast Deal
+                </span>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Seconde Main</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Appareils reconditionnés à prix réduit — stock limité</p>
+            </div>
+        </div>
+        <a href="{% url 'catalog:catalog' %}" class="text-orange-500 hover:underline text-sm font-bold flex items-center shrink-0">
+            Voir tout <i class="fa-solid fa-chevron-right text-xs ml-1"></i>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        {% for product in fast_deal_products %}
+        <a href="{{ product.get_absolute_url }}" class="group bg-white dark:bg-[#1E1E1E] rounded-xl overflow-hidden shadow-sm border border-gray-100 dark:border-white/5 hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-500/50 transition-all duration-300 flex flex-col relative">
+            <!-- Deal badge top-left -->
+            <div class="absolute top-2 left-2 z-10">
+                <span class="bg-gradient-to-r from-orange-500 to-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                    <i class="fa-solid fa-bolt text-[8px] mr-0.5"></i>DEAL
+                </span>
+            </div>
+            <!-- Second-hand badge top-right -->
+            <div class="absolute top-2 right-2 z-10">
+                <span class="bg-gray-800/70 backdrop-blur text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                    2<sup>nd</sup> main
+                </span>
+            </div>
+
+            <!-- Image -->
+            <div class="relative w-full pt-[100%] bg-gray-50 dark:bg-black/20 overflow-hidden">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                         class="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105">
+                {% else %}
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fa-solid fa-mobile text-5xl text-gray-300 dark:text-gray-700"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="p-3 flex flex-col flex-grow">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">{{ product.brand }}</p>
+                <h3 class="font-bold text-gray-900 dark:text-gray-100 text-[12px] leading-tight line-clamp-2 mb-2">{{ product.name }}</h3>
+                <div class="mt-auto">
+                    <span class="font-black text-sm text-orange-500">{{ product.price|floatformat:"0" }} FCFA</span>
+                    {% if not product.is_in_stock %}
+                        <span class="block text-[10px] text-red-500 font-semibold mt-0.5">Indisponible</span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Features Full Width Section -->
+<div class="features-section py-16 mt-8 w-full relative left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] border-y">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4 md:px-8">
+            <!-- Livraison Rapide -->
+            <div class="flex flex-col items-center">
+                <div class="feat-icon-wrap w-16 h-16 rounded-full text-brand-green flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fa-solid fa-truck-fast text-2xl"></i>
+                </div>
+                <h3 class="feat-title font-bold text-lg mb-3">Livraison Rapide</h3>
+                <p class="feat-text text-sm font-medium leading-relaxed max-w-xs">
+                    Livraison express à Douala, Yaoundé et partout au Cameroun en 24-48h.
+                </p>
+            </div>
+            
+            <!-- Produits Authentiques -->
+            <div class="flex flex-col items-center">
+                <div class="feat-icon-wrap w-16 h-16 rounded-full text-brand-green flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fa-solid fa-certificate text-2xl"></i>
+                </div>
+                <h3 class="feat-title font-bold text-lg mb-3">Produits Authentiques</h3>
+                <p class="feat-text text-sm font-medium leading-relaxed max-w-xs">
+                    100% originaux avec garantie fabricant et certification AUDSTOREsarl.
+                </p>
+            </div>
+            
+            <!-- Support 24/7 -->
+            <div class="flex flex-col items-center">
+                <div class="feat-icon-wrap w-16 h-16 rounded-full text-brand-green flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fa-solid fa-headset text-2xl"></i>
+                </div>
+                <h3 class="feat-title font-bold text-lg mb-3">Support 24h/24</h3>
+                <p class="feat-text text-sm font-medium leading-relaxed max-w-xs">
+                    Nos experts sont disponibles à toute heure pour vous conseiller dans votre choix.
+                </p>
+            </div>
+
+            <!-- Politique de retour -->
+            <div class="flex flex-col items-center">
+                <div class="feat-icon-wrap w-16 h-16 rounded-full text-brand-green flex items-center justify-center mb-6 shadow-sm">
+                    <i class="fa-solid fa-rotate-left text-2xl"></i>
+                </div>
+                <h3 class="feat-title font-bold text-lg mb-3">Retour Facile</h3>
+                <p class="feat-text text-sm font-medium leading-relaxed max-w-xs">
+                    Retour accepté sous 7 jours si le produit est dans son état d'origine.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

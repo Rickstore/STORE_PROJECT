@@ -1,0 +1,147 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Gestion des Livreurs{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">Livreurs</h2>
+        <p class="text-sm text-gray-500">Gérez votre personnel de livraison ({{ total_livreurs }} total)</p>
+    </div>
+    <a href="{% url 'dashboard:add_livreur' %}" class="bg-[#8CC63F] hover:bg-[#7ab32f] text-black font-bold py-2 px-4 rounded-lg flex items-center transition-colors shadow-sm">
+        <i class="fa-solid fa-plus mr-2"></i> Ajouter un livreur
+    </a>
+</div>
+
+<!-- Search -->
+<div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 font-sans">
+    <form method="get" class="flex gap-4">
+        <div class="flex-grow">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-400"></i>
+                </div>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Rechercher par nom, email ou téléphone..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-[#8CC63F] focus:border-[#8CC63F] sm:text-sm">
+            </div>
+        </div>
+        <button type="submit" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+            Filtrer
+        </button>
+        {% if request.GET.q %}
+            <a href="{% url 'dashboard:livreur_list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors">
+                Réinitialiser
+            </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Livreurs Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden font-sans">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identifiant</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'ajout</th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for livreur in livreurs %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-[#8CC63F]/20 flex items-center justify-center text-[#8CC63F] font-bold">
+                                {{ livreur.username|slice:":1"|upper }}
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ livreur.username }}</div>
+                                <div class="text-sm text-gray-500">ID: #{{ livreur.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"><i class="fa-solid fa-envelope w-4 mr-1 text-gray-400"></i> {{ livreur.email }}</div>
+                        <div class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-phone w-4 mr-1 text-gray-400"></i> {{ livreur.phone|default:"Non renseigné" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if livreur.is_active %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Actif
+                            </span>
+                        {% else %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                Inactif
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ livreur.date_joined|date:"d M Y" }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end space-x-3">
+                            <a href="{% url 'dashboard:edit_livreur' livreur.id %}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-md transition-colors" title="Modifier">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            
+                            <form action="{% url 'dashboard:delete_livreur' livreur.id %}" method="post" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le livreur {{ livreur.username }} ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-md transition-colors" title="Supprimer">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                        <i class="fa-solid fa-users text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-lg font-medium text-gray-900">Aucun livreur trouvé.</p>
+                        <p class="text-sm text-gray-500 mt-1">Cliquez sur le bouton "Ajouter un livreur" pour en créer un nouveau.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6 flex items-center justify-between">
+         <!-- Pagination simple logic -->
+         <div class="flex-1 flex justify-between items-center sm:hidden">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Précédent</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Suivant</a>
+            {% endif %}
+        </div>
+        
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Affichage <span class="font-medium">{{ page_obj.start_index }}</span> à <span class="font-medium">{{ page_obj.end_index }}</span> sur <span class="font-medium">{{ paginator.count }}</span> résultats
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                     {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Précédent</a>
+                     {% endif %}
+                     <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+                         {{ page_obj.number }} / {{ paginator.num_pages }}
+                     </span>
+                     {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Suivant</a>
+                     {% endif %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

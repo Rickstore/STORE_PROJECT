@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Commande {{ order.order_number }} | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="mb-4 flex items-center">
+        <a href="{% url 'delivery:dashboard' %}" class="text-brand-green hover:underline flex items-center">
+            &larr; Retour au tableau de bord
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- En-tête de commande -->
+        <div class="bg-gray-50 p-6 border-b border-gray-200 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Commande {{ order.order_number }}</h2>
+                <p class="text-gray-500 mt-1">Client : {{ order.user.get_full_name|default:order.user.username }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-gray-500">Montant à encaisser</p>
+                <p class="text-3xl font-bold text-brand-green">{{ order.total }} FCFA</p>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <!-- Informations de livraison et Actions Rapides -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2 border-b pb-2">Adresse de livraison</h3>
+                    <p class="text-gray-600 mb-1">{{ order.address.address }}</p>
+                    <p class="text-gray-600">{{ order.address.city }}</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-700 mb-2 border-b pb-2">Contact Client</h3>
+                    <p class="text-gray-600 mb-3">{{ order.address.phone }}</p>
+                    <!-- Bouton d'appel rapide -->
+                    <a href="tel:{{ order.address.phone }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        Appeler le client
+                    </a>
+                </div>
+            </div>
+
+            <!-- Liste des produits de la commande -->
+            <h3 class="font-semibold text-gray-700 mb-4 border-b pb-2">Détails des articles</h3>
+            <ul class="divide-y divide-gray-200 mb-8">
+                {% for item in order.items.all %}
+                <li class="py-3 flex justify-between">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ item.product.name }}</p>
+                        <p class="text-sm text-gray-500">
+                            Qté: {{ item.quantity }}
+                            {% if item.color %}| Couleur: {{ item.color }}{% endif %}
+                            {% if item.capacity %}| Capacité: {{ item.capacity }}{% endif %}
+                        </p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <!-- Gestion Dynamique du Statut Livreur -->
+            {% if order.status == 'assigned' %}
+                <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                    <h3 class="font-bold text-lg text-blue-800 mb-2">Départ du Dépôt</h3>
+                    <p class="text-sm text-blue-600 mb-4">La commande est prête. Indiquez que vous la prenez en charge pour alerter le client.</p>
+                    <form action="{% url 'delivery:change_status' order.order_number %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="delivering">
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 rounded-md shadow text-base font-bold text-white bg-blue-600 hover:bg-blue-700">
+                            Récupéré au dépôt (Démarrer)
+                        </button>
+                    </form>
+                </div>
+            {% elif order.status == 'delivering' %}
+                <!-- Zone de validation de livraison (OTP + Signature) -->
+                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 mb-6">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4">Livraison effectuée (Validation)</h3>
+                    
+                    <form id="delivery-form" method="post" action="{% url 'delivery:confirm_delivery' order.order_number %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-6">
+                            <label for="otp" class="block text-sm font-black text-gray-700 mb-1">Code de confirmation (4 chiffres) *</label>
+                            <p class="text-[10px] text-gray-400 mb-2">Demandez au client le code reçu après validation de sa commande.</p>
+                            <input type="text" id="otp" name="otp" required maxlength="4" pattern="[0-9]{4}" placeholder="Ex: 1234" class="block w-full border-gray-300 rounded-xl shadow-sm focus:ring-brand-green focus:border-brand-green p-4 border text-2xl font-black text-center tracking-[1rem] bg-gray-50 focus:bg-white transition-all uppercase">
+                        </div>
+
+
+
+                        <button type="submit" id="submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-brand-green hover:bg-[#7ab32f]">
+                            Livraison effectuée (Terminer)
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Signaler un Incident -->
+                <div class="bg-red-50 rounded-lg p-6 border border-red-200">
+                    <h3 class="font-bold text-lg text-red-800 mb-2">Signaler un Problème</h3>
+                    <p class="text-xs text-red-600 mb-4">Client absent, adresse incorrecte, ou autre incident de parcours.</p>
+                    <form action="{% url 'delivery:report_incident' order.order_number %}" method="post">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 gap-3 mb-3">
+                            <select name="incident_type" required class="block w-full border-red-200 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm p-2 border">
+                                <option value="ABSENT">Client absent / injoignable</option>
+                                <option value="ADRESSE_INCORRECTE">Adresse incorrecte / introuvable</option>
+                                <option value="REFUS">Client refuse le colis</option>
+                                <option value="AUTRE">Autre incident</option>
+                            </select>
+                            <textarea name="details" required rows="2" class="block w-full border-red-200 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 text-sm p-3 border" placeholder="Précisez les détails ici..."></textarea>
+                        </div>
+                        <button type="submit" onclick="return confirm('Voulez-vous vraiment signaler cet incident ? La commande sera marquée comme échouée.');" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-bold text-white bg-red-600 hover:bg-red-700">
+                            Enregistrer l'incident
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="bg-gray-100 p-6 rounded-lg text-center">
+                    <p class="font-medium text-gray-800">Commande clôturée (Statut : {{ order.get_status_display }})</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Script pour validation livraison -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validation simple du formulaire (optionnel car HTML5 required gère déjà l'OTP)
+        const form = document.getElementById('delivery-form');
+         if (form) {
+            form.addEventListener('submit', function(e) {
+                const otp = document.getElementById('otp').value;
+                if (!otp || otp.length !== 4) {
+                    e.preventDefault();
+                    alert("Le code OTP à 4 chiffres est obligatoire.");
+                }
+            });
+         }
+    });
+</script>
+{% endblock %}

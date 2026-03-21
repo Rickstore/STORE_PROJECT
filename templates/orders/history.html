@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Historique de commandes | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Historique de vos commandes</h1>
+
+    {% if orders %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut Livraison</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut Paiement</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in orders %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                <div>{{ order.order_number }}</div>
+                                {% if order.status != 'delivered' and order.status != 'failed' and order.delivery_code %}
+                                <div class="mt-1 flex items-center gap-1.5">
+                                    <span class="text-[10px] font-bold text-brand-green uppercase tracking-tight">Code livraison :</span>
+                                    <span class="inline-flex gap-0.5">
+                                        {% for digit in order.delivery_code %}
+                                        <span class="w-4 h-5 bg-brand-green/10 border border-brand-green/20 rounded-sm flex items-center justify-center text-[10px] font-black text-brand-green">{{ digit }}</span>
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ order.created_at|date:"d M Y, H:i" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                {{ order.total }} FCFA
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif order.status == 'pending' %}bg-gray-100 text-gray-800
+                                    {% elif order.status == 'failed' %}bg-red-100 text-red-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if order.payment_status == 'paid' %}bg-green-100 text-green-800
+                                    {% elif order.payment_status == 'failed' %}bg-red-100 text-red-800
+                                    {% else %}bg-orange-100 text-orange-800{% endif %}">
+                                    {{ order.get_payment_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <svg class="h-24 w-24 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">Aucune commande</h3>
+            <p class="text-gray-500 mb-6">Vous n'avez pas encore passé de commande chez nous.</p>
+            <a href="{% url 'catalog:home' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-brand-green hover:bg-[#7ab32f]">
+                Découvrir nos produits
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

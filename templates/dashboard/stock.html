@@ -1,0 +1,125 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Stocks & Alertes | AUDSTOREsarl{% endblock %}
+{% block page_title %}Stocks & Alertes{% endblock %}
+
+{% block content %}
+
+<!-- Alert Summary -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 border border-red-100 shadow-sm flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center text-red-600 shrink-0">
+            <i class="fa-solid fa-ban text-sm"></i>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500">Épuisés (0 u.)</p>
+            <p class="text-xl font-black text-red-600">{{ out_of_stock }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-orange-100 shadow-sm flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600 shrink-0">
+            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500">Critique (1–3 u.)</p>
+            <p class="text-xl font-black text-orange-600">{{ critical }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 border border-yellow-100 shadow-sm flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600 shrink-0">
+            <i class="fa-solid fa-circle-exclamation text-sm"></i>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500">Avertissement (4–{{ threshold }} u.)</p>
+            <p class="text-xl font-black text-yellow-600">{{ warning }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Threshold Config + Table -->
+<div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="p-4 border-b border-gray-50 flex items-center justify-between gap-3">
+        <div>
+            <h2 class="font-bold text-gray-900 text-sm">Produits à réapprovisionner</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Affiche les produits avec un stock inférieur ou égal au seuil défini</p>
+        </div>
+        <form method="get" class="flex items-center gap-2">
+            <label class="text-xs text-gray-500 font-medium">Seuil d'alerte :</label>
+            <input type="number" name="threshold" value="{{ threshold }}" min="1" max="50"
+                class="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-[#8CC63F]">
+            <button type="submit" class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-700 transition-colors">Appliquer</button>
+        </form>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-gray-50 text-xs text-gray-400 font-semibold uppercase tracking-wider bg-gray-50/50">
+                    <th class="px-5 py-3 text-left">Produit</th>
+                    <th class="px-5 py-3 text-left">Marque</th>
+                    <th class="px-5 py-3 text-left">Catégorie</th>
+                    <th class="px-5 py-3 text-right">Prix</th>
+                    <th class="px-5 py-3 text-center">Stock actuel</th>
+                    <th class="px-5 py-3 text-center">Niveau</th>
+                    <th class="px-5 py-3 text-center">Mettre à jour</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for product in low_stock_products %}
+                <tr class="hover:bg-gray-50/50">
+                    <td class="px-5 py-3.5">
+                        <div class="flex items-center gap-3">
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" class="w-9 h-9 rounded-lg object-cover border border-gray-100 shrink-0">
+                            {% else %}
+                            <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-mobile text-gray-300 text-sm"></i>
+                            </div>
+                            {% endif %}
+                            <p class="font-semibold text-gray-900 max-w-[180px] truncate">{{ product.name }}</p>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-gray-600 text-xs font-medium">{{ product.brand.name|default:"—" }}</td>
+                    <td class="px-5 py-3.5 text-gray-500 text-xs">{{ product.category.name|default:"—" }}</td>
+                    <td class="px-5 py-3.5 text-right font-bold text-gray-900 text-xs">{{ product.price|floatformat:0 }} FCFA</td>
+                    <td class="px-5 py-3.5 text-center">
+                        <span class="text-xl font-black {% if product.stock == 0 %}text-red-600{% elif product.stock <= 3 %}text-orange-600{% else %}text-yellow-600{% endif %}">
+                            {{ product.stock }}
+                        </span>
+                        <span class="text-xs text-gray-400 ml-0.5">u.</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-center">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold
+                            {% if product.stock == 0 %}bg-red-50 text-red-700
+                            {% elif product.stock <= 3 %}bg-orange-50 text-orange-700
+                            {% else %}bg-yellow-50 text-yellow-700{% endif %}">
+                            {% if product.stock == 0 %}Épuisé{% elif product.stock <= 3 %}Critique{% else %}Faible{% endif %}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3.5 text-center">
+                        <form method="post" class="flex items-center gap-2 justify-center">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <input type="hidden" name="threshold" value="{{ threshold }}">
+                            <input type="number" name="stock" min="0" max="9999" placeholder="{{ product.stock }}"
+                                class="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-[#8CC63F]">
+                            <button type="submit" class="bg-[#8CC63F] hover:bg-[#7ab32f] text-black font-bold px-3 py-1.5 rounded-lg text-xs transition-colors">
+                                Mettre à jour
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-5 py-12 text-center text-gray-400">
+                        <i class="fa-solid fa-circle-check text-3xl mb-3 block text-green-300"></i>
+                        <p class="font-semibold text-green-600 text-sm">Tous les stocks sont à un niveau optimal.</p>
+                        <p class="text-xs text-gray-400 mt-1">Aucun produit sous le seuil de {{ threshold }} unités.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

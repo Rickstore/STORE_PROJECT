@@ -1,0 +1,167 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Commande {{ order.order_number }} | AUDSTOREsarl{% endblock %}
+{% block page_title %}Commande {{ order.order_number }}{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <a href="{% url 'dashboard:orders' %}" class="text-xs text-gray-500 hover:text-gray-700 font-medium flex items-center gap-1 w-fit">
+        <i class="fa-solid fa-arrow-left"></i> Retour aux commandes
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left: Order Items + Client Info -->
+    <div class="lg:col-span-2 space-y-5">
+
+        <!-- Produits commandés -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-gray-50">
+                <h2 class="font-bold text-gray-900 text-sm">Articles commandés</h2>
+            </div>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-xs text-gray-400 font-semibold uppercase bg-gray-50/50">
+                        <th class="px-5 py-3 text-left">Produit</th>
+                        <th class="px-5 py-3 text-center">Qté</th>
+                        <th class="px-5 py-3 text-right">Prix unitaire</th>
+                        <th class="px-5 py-3 text-right">Sous-total</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    {% for item in order.items.all %}
+                    <tr class="hover:bg-gray-50/50">
+                        <td class="px-5 py-3.5">
+                            <div class="flex items-center gap-3">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" class="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0">
+                                {% else %}
+                                <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-mobile text-gray-300"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ item.product.name }}</p>
+                                    <div class="flex gap-2">
+                                        <p class="text-[10px] text-gray-400">{{ item.product.brand }}</p>
+                                        {% if item.color %}<span class="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">Couleur: {{ item.color }}</span>{% endif %}
+                                        {% if item.capacity %}<span class="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">Capacité: {{ item.capacity }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-5 py-3.5 text-center font-bold text-gray-700">{{ item.quantity }}</td>
+                        <td class="px-5 py-3.5 text-right text-gray-600">{{ item.price|floatformat:0 }} FCFA</td>
+                        <td class="px-5 py-3.5 text-right font-bold text-gray-900">{{ item.get_cost|floatformat:0 }} FCFA</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="border-t border-gray-100 bg-gray-50/50">
+                        <td colspan="3" class="px-5 py-3 text-right font-bold text-gray-700">Total :</td>
+                        <td class="px-5 py-3 text-right font-black text-gray-900 text-base">{{ order.total|floatformat:0 }} FCFA</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Client & Livraison -->
+        <div class="grid grid-cols-2 gap-5">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 text-sm mb-3">Client</h3>
+                <div class="space-y-1.5 text-sm text-gray-600">
+                    <p><span class="text-gray-400 text-xs">Nom :</span> <span class="font-medium">{{ order.user.username }}</span></p>
+                    <p><span class="text-gray-400 text-xs">Email :</span> {{ order.user.email|default:"—" }}</p>
+                    <p><span class="text-gray-400 text-xs">Tél :</span> {{ order.user.phone|default:"—" }}</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                <h3 class="font-bold text-gray-900 text-sm mb-3">Livraison</h3>
+                <div class="space-y-1.5 text-sm text-gray-600">
+                    <p><span class="text-gray-400 text-xs">Type :</span> <span class="font-medium">{{ order.get_delivery_type_display }}</span></p>
+                    {% if order.address %}
+                    <p><span class="text-gray-400 text-xs">Ville :</span> {{ order.address.city }}</p>
+                    <p><span class="text-gray-400 text-xs">Adresse :</span> {{ order.address.address }}</p>
+                    <p><span class="text-gray-400 text-xs">Tél :</span> {{ order.address.phone|default:"—" }}</p>
+                    {% elif order.store %}
+                    <p><span class="text-gray-400 text-xs">Magasin :</span> {{ order.store }}</p>
+                    {% endif %}
+                    {% if order.assigned_delivery %}
+                    <p><span class="text-gray-400 text-xs">Livreur :</span> <span class="font-semibold text-[#8CC63F]">{{ order.assigned_delivery.username }}</span></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if order.delivery_notes %}
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 text-sm mb-2">Notes de livraison</h3>
+            <p class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">{{ order.delivery_notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right: Actions & Status -->
+    <div class="space-y-5">
+
+        <!-- Current Status -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 text-sm mb-4">Statut actuel</h3>
+            <div class="flex flex-col gap-2 mb-4">
+                <span class="px-3 py-2 rounded-lg text-sm font-bold text-center status-{{ order.status }}">
+                    {{ order.get_status_display }}
+                </span>
+                <span class="px-3 py-2 rounded-lg text-sm font-bold text-center {% if order.payment_status == 'paid' %}status-paid{% elif order.payment_status == 'failed' %}status-failed{% else %}status-pending{% endif %}">
+                    Paiement : {{ order.get_payment_status_display }}
+                </span>
+            </div>
+            <div class="text-xs text-gray-400 space-y-0.5">
+                <p>Créée le : <span class="text-gray-600 font-medium">{{ order.created_at|date:"d/m/Y à H:i" }}</span></p>
+                <p>Mise à jour : <span class="text-gray-600 font-medium">{{ order.updated_at|date:"d/m/Y à H:i" }}</span></p>
+            </div>
+        </div>
+
+        <!-- Change Status -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 text-sm mb-4">Changer le statut</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="space-y-2 mb-4">
+                    {% for value, label in status_choices %}
+                    <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer {% if order.status == value %}bg-[#8CC63F]/8 border border-[#8CC63F]/30{% endif %}">
+                        <input type="radio" name="status" value="{{ value }}" class="text-[#8CC63F] focus:ring-[#8CC63F]" {% if order.status == value %}checked{% endif %}>
+                        <span class="text-sm font-medium text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="w-full bg-[#8CC63F] hover:bg-[#7ab32f] text-black font-bold py-2.5 rounded-lg text-sm transition-colors">
+                    Mettre à jour le statut
+                </button>
+            </form>
+        </div>
+
+        <!-- Assign Livreur -->
+        {% if order.delivery_type == 'delivery' %}
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 class="font-bold text-gray-900 text-sm mb-4">Assigner un livreur</h3>
+            <form method="post">
+                {% csrf_token %}
+                <select name="livreur_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-[#8CC63F]">
+                    <option value="">-- Sélectionner un livreur --</option>
+                    {% for livreur in livreurs %}
+                    <option value="{{ livreur.id }}" {% if order.assigned_delivery_id == livreur.id %}selected{% endif %}>{{ livreur.username }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="w-full bg-gray-900 hover:bg-gray-700 text-white font-bold py-2.5 rounded-lg text-sm transition-colors">
+                    Assigner
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

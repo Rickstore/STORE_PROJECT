@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AUDSTOREsarl{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'fontawesome/css/all.min.css' %}">
+
+
+    {% block extra_head %}{% endblock %}
+    <style>
+        :root {
+            --brand-green: #8CC63F;
+            --brand-dark: #1A1A1A;
+            --brand-light: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #1A1A1A;
+            --border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark {
+            --brand-dark: #0A0A0A;
+            --brand-light: #121212;
+            --card-bg: #1E1E1E;
+            --text-main: #F8F9FA;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .text-brand-green {
+            color: var(--brand-green);
+        }
+
+        .bg-brand-green {
+            background-color: var(--brand-green);
+        }
+
+        .border-brand-green {
+            border-color: var(--brand-green);
+        }
+
+        .bg-brand-dark {
+            background-color: var(--brand-dark);
+        }
+
+        body {
+            background-color: var(--brand-light);
+            color: var(--text-main);
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        body, .bg-white, .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .border-gray-100, .border-gray-200, .bg-gray-50, .bg-gray-100 {
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, opacity 0.5s ease !important;
+        }
+
+        /* Override Tailwind Defaults for Dark Mode */
+        .bg-white {
+            background-color: var(--card-bg) !important;
+        }
+
+        .text-gray-900,
+        .text-gray-800,
+        .text-gray-700 {
+            color: var(--text-main) !important;
+        }
+
+        .text-gray-600,
+        .text-gray-500 {
+            color: var(--text-main) !important;
+            opacity: 0.7;
+        }
+
+        .border-gray-100,
+        .border-gray-200 {
+            border-color: var(--border-color) !important;
+        }
+
+        /* Premium Transitions */
+        button,
+        a,
+        .card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button:hover,
+        a:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            shadow: 0 10px 15px -3px rgba(140, 198, 63, 0.2);
+        }
+
+        /* Toast Notification */
+        #toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: #1A1A1A;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            margin-top: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 4px solid var(--brand-green);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Shine Effect Animation */
+        @keyframes shine {
+            0% {
+                left: -100%;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                left: 100%;
+                opacity: 0;
+            }
+        }
+
+        .shine-box {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.4) 50%,
+                    transparent 100%);
+            transform: skewX(-20deg);
+            animation: shine 4s infinite;
+        }
+
+        /* Soft Fade-In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* ── Icônes de changement de thème ──────────────────────────────── */
+        #icon-sun {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        #icon-moon {
+            opacity: 0;
+            transform: rotate(-90deg) scale(0.5);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        /* Quand le mode sombre est actif */
+        .dark #icon-sun {
+            opacity: 0;
+            transform: rotate(90deg) scale(0.5);
+        }
+        .dark #icon-moon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        /* ── Dark Mode Overrides (Global) ────────────────────────────────── */
+        .dark .bg-gray-50 {
+            background-color: #121212 !important;
+        }
+        .dark .bg-gray-100 {
+            background-color: #1a1a1a !important;
+        }
+        .dark .bg-gray-200 {
+            background-color: #2a2a2a !important;
+        }
+        .dark .border-gray-100 {
+            border-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        .dark .border-gray-200 {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        .dark .border-gray-300 {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        .dark .text-gray-700,
+        .dark .text-gray-600,
+        .dark .text-gray-500 {
+            color: #E5E7EB !important;
+        }
+        .dark .text-gray-400 {
+            color: #9CA3AF !important;
+        }
+
+        /* Inputs in Dark Mode */
+        .dark input:not([type="submit"]):not([type="button"]),
+        .dark textarea,
+        .dark select {
+            background-color: #1E1E1E !important;
+            color: #F8F9FA !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: #6B7280 !important;
+        }
+        .dark input:focus,
+        .dark textarea:focus {
+            border-color: var(--brand-green) !important;
+            box-shadow: 0 0 0 2px rgba(140, 198, 63, 0.1) !important;
+        }
+        
+        /* Specific Search Bar for Dark Mode */
+        .dark .search-input {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+        }
+        .dark .search-input:focus {
+            background-color: rgba(255, 255, 255, 0.12) !important;
+        }
+
+        /* ── Section Fonctionnalités en Mode Sombre ─────────────────────── */
+        .features-section {
+            background-color: #F8FAF4;
+            border-color: #E8F3DB;
+        }
+        .dark .features-section {
+            background-color: #181818;
+            border-color: rgba(255,255,255,0.08);
+        }
+        .features-section .feat-title {
+            color: #111827;
+        }
+        .dark .features-section .feat-title {
+            color: #F3F4F6;
+        }
+        .features-section .feat-text {
+            color: #6B7280;
+        }
+        .dark .features-section .feat-text {
+            color: #9CA3AF;
+        }
+        .features-section .feat-icon-wrap {
+            background-color: #E3F2D2;
+        }
+        .dark .features-section .feat-icon-wrap {
+            background-color: rgba(140,198,63,0.12);
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 font-sans min-h-screen flex flex-col pt-[88px]">
+
+    <!-- Conteneur de Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Navbar Fixée -->
+    <nav
+        class="bg-white px-3 md:px-8 py-3 md:py-4 shadow-sm fixed w-full top-0 z-50 flex items-center justify-between border-b dark:border-white/5 transition-colors duration-500">
+        <!-- Logo et Localisation -->
+        <div class="flex items-center gap-3 md:gap-6 shrink-0 z-10">
+            <a href="/" class="flex items-center group">
+                <div
+                    class="w-4 h-6 bg-brand-green mr-1.5 md:mr-2 rounded-sm inline-block group-hover:rotate-12 transition-transform">
+                </div>
+                <span class="text-xl md:text-2xl font-black tracking-tight" style="color: var(--text-main);">
+                    AUDSTORE<span class="text-gray-800 dark:text-gray-300 text-[10px] md:text-sm font-bold align-bottom ml-0.5">sarl</span>
+                </span>
+            </a>
+
+            <div class="hidden md:flex items-center text-sm font-semibold gap-4 opacity-80">
+                <span class="flex items-center"><i class="fa-solid fa-location-dot mr-1 text-brand-green"></i>
+                    Douala</span>
+                <span>Yaoundé</span>
+            </div>
+        </div>
+
+        <!-- Barre de recherche Centrale et Liens Rapides -->
+        <div class="flex-grow max-w-2xl hidden md:flex items-center justify-center gap-6 px-4">
+            <a href="{% url 'catalog:catalog' %}"
+                class="text-sm font-bold opacity-80 hover:opacity-100 hover:text-brand-green transition-all uppercase tracking-wide whitespace-nowrap">
+                Catalogue</a>
+
+            <form action="{% url 'catalog:catalog' %}" method="get" class="relative w-full max-w-md group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fa-solid fa-search text-gray-400"></i>
+                </div>
+                <input type="text" name="q" placeholder="Rechercher un smartphone, prix..."
+                    class="search-input block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-gray-100 dark:bg-white/10 text-sm focus:ring-0 focus:bg-gray-200 dark:focus:bg-white/20 transition-colors duration-300">
+            </form>
+        </div>
+
+        <!-- Panier et Compte -->
+        <div class="flex items-center gap-1 sm:gap-3 md:gap-4 order-3 flex-nowrap shrink-0">
+            <!-- Bouton du Menu Mobile -->
+            <button id="mobile-menu-open" class="md:hidden p-2 flex items-center justify-center text-current hover:text-brand-green transition-colors">
+                <i class="fa-solid fa-bars-staggered text-xl"></i>
+            </button>
+
+            <!-- Bouton du Thème Sombre -->
+            <button id="dark-mode-toggle"
+                class="relative p-2 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-current focus:outline-none overflow-hidden"
+                title="Changer de thème">
+                <!-- Soleil : visible en mode clair -->
+                <i id="icon-sun" class="fa-solid fa-sun absolute text-lg text-yellow-400"></i>
+                <!-- Lune : visible en mode sombre -->
+                <i id="icon-moon" class="fa-solid fa-moon absolute text-lg"></i>
+            </button>
+
+            {% if not user.is_authenticated %}
+            <div class="hidden sm:flex items-center gap-2 border-l pl-4 dark:border-white/10">
+                <a href="{% url 'users:login' %}"
+                    class="text-sm font-bold opacity-80 hover:opacity-100 transition-opacity">Connexion</a>
+                <a href="{% url 'users:register' %}"
+                    class="bg-brand-green hover:bg-[#7ab32f] text-black text-xs font-black px-3 py-1.5 rounded-lg transition-all">S'inscrire</a>
+            </div>
+            {% endif %}
+
+            <a href="{% url 'cart:cart_detail' %}" class="relative p-2 flex items-center justify-center text-current hover:text-brand-green transition-colors">
+                <i class="fa-solid fa-shopping-cart text-xl"></i>
+                <span class="cart-count absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-brand-green text-[10px] font-bold px-1.5 py-0.5 rounded-full text-black border-2 border-white dark:border-[#1A1A1A]">
+                    {{ request.session.cart|length|default:"0" }}
+                </span>
+            </a>
+
+            {% if user.is_authenticated %}
+            <div class="relative group">
+                <button
+                    class="bg-brand-green hover:bg-[#7ab32f] text-black px-4 py-2 rounded-xl font-bold text-sm transition-all flex items-center gap-2 overflow-hidden shadow-sm">
+                    {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" class="w-6 h-6 rounded-full object-cover border border-black/10">
+                    {% else %}
+                    <i class="fa-solid fa-user-circle text-lg"></i>
+                    {% endif %}
+                    <span class="max-w-[80px] truncate">{{ user.username }}</span>
+                </button>
+                <div
+                    class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-lg py-2 hidden group-hover:block border border-gray-100 z-50">
+                    {% if user.role == 'admin' or user.is_superuser %}
+                    <a href="{% url 'dashboard:index' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-chart-line w-4 text-gray-400"></i> Dashboard Admin</a>
+                    <a href="{% url 'dashboard:products' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-mobile-screen w-4 text-gray-400"></i> Produits</a>
+                    <a href="{% url 'dashboard:orders' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-receipt w-4 text-gray-400"></i> Commandes</a>
+                    {% elif user.role == 'livreur' %}
+                    <a href="{% url 'delivery:dashboard' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-truck w-4 text-gray-400"></i> Espace Livreur</a>
+                    <a href="{% url 'delivery:profile' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-user-circle w-4 text-gray-400"></i> Mon Profil Livreur</a>
+                    {% else %}
+                    <a href="{% url 'users:profile' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-user w-4 text-gray-400"></i> Mon profil</a>
+                    <a href="{% url 'users:order_history' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-receipt w-4 text-gray-400"></i> Mes commandes</a>
+                    <a href="{% url 'cart:cart_detail' %}"
+                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><i
+                            class="fa-solid fa-shopping-cart w-4 text-gray-400"></i> Mon panier</a>
+                    {% endif %}
+                    <div class="border-t border-gray-100 mt-1 pt-1">
+                        <form method="post" action="{% url 'users:logout' %}" class="px-4 py-1">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="text-sm text-red-500 hover:text-red-700 w-full text-left flex items-center gap-2">
+                                <i class="fa-solid fa-power-off w-4"></i> Déconnexion
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <a href="{% url 'users:login' %}"
+                class="p-2 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-current"
+                title="Se connecter">
+                <i class="fa-solid fa-user-circle text-xl"></i>
+            </a>
+            {% endif %}
+        </div>
+
+    </nav>
+
+    <!-- Menu Mobile -->
+    <div id="mobile-menu-wrapper" class="fixed inset-0 z-[100] hidden md:hidden">
+        <!-- Arrière-plan (Cliquer pour fermer) -->
+        <div id="mobile-menu-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 transition-opacity duration-500"></div>
+
+        <!-- Tiroir du Menu Mobile (Style flottant) -->
+        <div id="mobile-menu-overlay"
+            class="absolute top-4 right-4 bottom-4 w-[85%] max-w-[320px] bg-[#121212]/90 backdrop-blur-2xl z-[101] rounded-3xl border border-white/10 shadow-2xl transform translate-x-[120%] transition-transform duration-500 ease-out flex flex-col overflow-hidden">
+            
+            <!-- En-tête du Menu Mobile -->
+            <div class="p-6 flex items-center justify-between border-b border-white/5">
+                <a href="/" class="flex items-center">
+                    <div class="w-3 h-5 bg-brand-green mr-2 rounded-sm"></div>
+                    <span class="text-xl font-black tracking-tight text-white uppercase italic">
+                        AUDSTORE<span class="text-brand-green text-[10px] ml-0.5">sarl</span>
+                    </span>
+                </a>
+                <button id="mobile-menu-close" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Contenu du Menu Mobile -->
+            <div class="flex-grow overflow-y-auto p-5 space-y-6">
+                <!-- Recherche dans le Menu -->
+                <form action="{% url 'catalog:catalog' %}" method="get" class="relative group">
+                    <input type="text" name="q" placeholder="Rechercher..."
+                        class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-4 pr-12 text-white text-sm focus:outline-none focus:border-brand-green transition-all placeholder:text-gray-500">
+                    <button type="submit"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-brand-green rounded-xl flex items-center justify-center text-black shadow-lg shadow-brand-green/20">
+                        <i class="fa-solid fa-search text-xs"></i>
+                    </button>
+                </form>
+
+                <!-- Liens de Navigation -->
+                <nav class="space-y-1.5">
+                    <a href="/"
+                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors">
+                            <i class="fa-solid fa-house"></i>
+                        </div>
+                        <span class="font-bold tracking-wide">Accueil</span>
+                    </a>
+                    <a href="{% url 'catalog:catalog' %}"
+                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                        </div>
+                        <span class="font-bold tracking-wide">Tous les produits</span>
+                    </a>
+
+                <!-- Navigation Client (Remplace les catégories) -->
+                {% if user.is_authenticated %}
+                <div class="pt-4 pb-1 px-4">
+                    <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Mon activité</span>
+                </div>
+                <nav class="space-y-1.5">
+                    <a href="{% url 'users:order_history' %}"
+                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <span class="font-bold tracking-wide">Mes commandes</span>
+                    </a>
+                    <a href="{% url 'cart:cart_detail' %}"
+                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                            <i class="fa-solid fa-shopping-cart"></i>
+                        </div>
+                        <span class="font-bold tracking-wide">Mon panier</span>
+                    </a>
+                </nav>
+                {% else %}
+                <!-- Afficher les catégories pour les visiteurs -->
+                <div class="pt-4 pb-1 px-4">
+                    <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Catégories</span>
+                </div>
+                <nav class="space-y-1.5">
+                    <a href="{% url 'catalog:catalog' %}?category=smartphones"
+                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                            <i class="fa-solid fa-mobile-button"></i>
+                        </div>
+                        <span class="font-bold tracking-wide">Smartphones</span>
+                    </a>
+                    <a href="{% url 'catalog:catalog' %}?category=ecouteurs-audio"
+                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                            <i class="fa-solid fa-headphones"></i>
+                        </div>
+                        <span class="font-bold tracking-wide">Accessoires & Audio</span>
+                    </a>
+                </nav>
+                {% endif %}
+            </div>
+
+            <div class="p-6 bg-white/5 border-t border-white/5">
+                <div class="flex flex-col gap-3">
+                    {% if user.is_authenticated %}
+                        <div class="space-y-3">
+                            <a href="{% url 'users:profile' %}" class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center text-black font-bold text-xs uppercase">
+                                        {{ user.username|slice:":2" }}
+                                    </div>
+                                    <span class="text-sm font-bold text-white">{{ user.username }}</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-white/20 text-xs"></i>
+                            </a>
+                            <form method="post" action="{% url 'users:logout' %}" class="w-full">
+                                {% csrf_token %}
+                                <button type="submit" class="w-full flex items-center gap-3 p-3 text-red-500 hover:text-red-400 bg-red-500/5 rounded-xl border border-red-500/10 transition-all text-xs font-bold">
+                                    <i class="fa-solid fa-power-off"></i>
+                                    Déconnexion
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="{% url 'users:login' %}" class="flex items-center justify-center py-3 bg-white/5 rounded-xl text-xs font-bold text-white border border-white/10 hover:bg-white/10 transition-all">Connexion</a>
+                            <a href="{% url 'users:register' %}" class="flex items-center justify-center py-3 bg-brand-green rounded-xl text-xs font-bold text-black border border-brand-green hover:shadow-lg hover:shadow-brand-green/20 transition-all">S'inscrire</a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-6 flex items-center justify-between opacity-40 text-[9px] font-black uppercase tracking-widest text-white">
+                    <span>&copy; AUDSTORE SARL</span>
+                    <div class="flex gap-4">
+                        <i class="fa-brands fa-facebook-f"></i>
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Messages Flash -->
+    <div class="container mx-auto mt-4 px-4 max-w-7xl">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="p-4 mb-4 rounded-md font-medium text-sm {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200{% elif message.tags == 'success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %} flex items-center">
+            <i class="fa-solid fa-circle-info mr-2"></i> {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Contenu Principal -->
+    <main class="flex-grow w-full animate-fade-in">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Section Carte -->
+    <div class="w-full bg-white dark:bg-black/20 py-12 border-t dark:border-white/5">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/3">
+                    <h3 class="text-2xl font-black mb-4">AUDSTORE Douala</h3>
+                    <p class="opacity-70 mb-6 text-sm">Notre boutique principale est située de
+                        Akwa, à côté de la Akwa, Direction commerciale MTN Dubai. Venez découvrir nos nouveautés !</p>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-map-pin text-brand-green"></i>
+                            <span class="font-bold">Akwa, Direction commerciale MTN Dubai</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-phone text-brand-green"></i>
+                            <span>+237 600 000 000</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-clock text-brand-green"></i>
+                            <span>Lun - Sam: 8h30 - 19h00</span>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="md:w-2/3 w-full h-[350px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-white/10 relative">
+                    <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
+                        src="https://www.openstreetmap.org/export/embed.html?bbox=9.699,4.048,9.709,4.054&amp;layer=mapnik&amp;marker=4.051,9.704"
+                        style="filter: grayscale(1) contrast(1.2); transition: filter 0.5s;" id="store-map"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pied de Page (Footer) -->
+    <footer class="bg-[#121620] text-gray-300 pt-16 pb-8 border-t-4 border-brand-green mt-auto">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div>
+                <a href="/" class="flex items-center mb-6">
+                    <div class="w-4 h-6 bg-brand-green mr-2 rounded-sm inline-block"></div>
+                    <span class="text-2xl font-black tracking-tight text-white">
+                        AUDSTORE<span class="text-brand-green text-sm font-bold align-bottom ml-0.5">sarl</span>
+                    </span>
+                </a>
+                <p class="text-sm text-gray-400 leading-relaxed mb-6">
+                    Cameroon's leading tech retailer specializing in premium mobile devices and accessories.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#"
+                        class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-green hover:text-black transition-colors"><i
+                            class="fa-brands fa-facebook-f text-sm"></i></a>
+                    <a href="#"
+                        class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-green hover:text-black transition-colors"><i
+                            class="fa-brands fa-twitter text-sm"></i></a>
+                    <a href="#"
+                        class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-brand-green hover:text-black transition-colors"><i
+                            class="fa-brands fa-instagram text-sm"></i></a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold mb-6 text-sm tracking-wider uppercase">Par Marque</h4>
+                <ul class="space-y-4 text-sm text-gray-400">
+                    <li><a href="{% url 'catalog:catalog' %}" class="hover:text-white transition-colors">Apple
+                            iPhones</a></li>
+                    <li><a href="{% url 'catalog:catalog' %}" class="hover:text-white transition-colors">Samsung
+                            Galaxy</a></li>
+                    <li><a href="{% url 'catalog:catalog' %}" class="hover:text-white transition-colors">Séries
+                            Xiaomi</a></li>
+                    <li><a href="{% url 'catalog:catalog' %}" class="hover:text-white transition-colors">Infinix
+                            Mobile</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold mb-6 text-sm tracking-wider uppercase">Nos Boutiques</h4>
+                <ul class="space-y-4 text-sm text-gray-400">
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-location-dot mt-1 mr-3 text-brand-green"></i>
+                        <span><strong>Douala:</strong> Akwa, Direction commerciale MTN Dubai</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-location-dot mt-1 mr-3 text-brand-green"></i>
+                        <span><strong>Yaoundé:</strong> Rue Kennedy, ancien direction Orange</span>
+                    </li>
+                    <li class="flex items-center mt-4 text-white font-medium">
+                        <i class="fa-solid fa-phone mr-3 text-brand-green"></i> +237 600 000 000
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-white font-bold mb-6 text-sm tracking-wider uppercase">Newsletter</h4>
+                <p class="text-sm text-gray-400 mb-4">Abonnez-vous pour recevoir nos offres exclusives et actualités
+                    tech.</p>
+                <form class="space-y-3" onsubmit="event.preventDefault();">
+                    <input type="email" placeholder="Votre adresse e-mail"
+                        class="w-full bg-[#1C212E] border-none rounded-md px-4 py-3 text-sm text-white focus:ring-1 focus:ring-brand-green">
+                    <button type="submit"
+                        class="w-full bg-brand-green hover:bg-[#7ab32f] text-black font-bold rounded-md px-4 py-3 text-sm transition-colors">S'abonner</button>
+                </form>
+            </div>
+        </div>
+
+        <div
+            class="max-w-7xl mx-auto px-4 mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+            <p>&copy; {% now "Y" %} AUDSTOREsarl. All rights reserved.</p>
+            <div class="space-x-4 mt-4 md:mt-0">
+                <a href="#" class="hover:text-white">Conditions d'utilisation</a>
+                <a href="#" class="hover:text-white">Politique de confidentialité</a>
+                <a href="#" class="hover:text-white">Politique de retour</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+
+</html>

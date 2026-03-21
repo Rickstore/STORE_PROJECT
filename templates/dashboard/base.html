@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Back-Office | AUDSTOREsarl{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+    <style>
+        :root { --green: #8CC63F; --dark: #1A1A1A; }
+        .text-green { color: var(--green); }
+        .bg-green { background-color: var(--green); }
+        .border-green { border-color: var(--green); }
+        .nav-active { background-color: rgba(140,198,63,0.12); color: var(--dark); font-weight: 700; }
+        .nav-active .nav-icon { color: var(--green); }
+        .sidebar-link { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; font-size:14px; color:#4B5563; transition:background 0.15s; }
+        .sidebar-link:hover { background:#F3F4F6; color: var(--dark); }
+        .sidebar-section { font-size:10px; font-weight:800; color:#9CA3AF; letter-spacing:.08em; text-transform:uppercase; padding:16px 14px 6px; }
+        .badge { display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; min-width:20px; height:20px; padding:0 5px; border-radius:9999px; }
+        .status-pending { background:#FEF3C7; color:#92400E; }
+        .status-confirmed { background:#DBEAFE; color:#1E40AF; }
+        .status-assigned { background:#E0E7FF; color:#4338CA; }
+        .status-delivering { background:#D1FAE5; color:#065F46; }
+        .status-delivered { background:#DCFCE7; color:#166534; }
+        .status-failed { background:#FEE2E2; color:#991B1B; }
+        .status-paid { background:#D1FAE5; color:#065F46; }
+
+        /* Soft Fade-In Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA]">
+
+<div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-white border-r border-gray-100 flex flex-col shrink-0 h-full overflow-y-auto">
+        <!-- Logo -->
+        <div class="px-5 py-5 border-b border-gray-100">
+            <a href="{% url 'dashboard:index' %}" class="flex items-center gap-3">
+                <div class="w-4 h-6 bg-[#8CC63F] rounded-sm shrink-0"></div>
+                <div class="leading-tight">
+                    <div class="font-black text-[#1A1A1A] text-base tracking-tight">AUDSTORE<span class="text-[#8CC63F] text-xs">sarl</span></div>
+                    <div class="text-[10px] text-gray-400 font-medium">Administrateur</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 py-3 px-3 space-y-0.5">
+
+            <div class="sidebar-section">Vue d'ensemble</div>
+            <a href="{% url 'dashboard:index' %}" class="sidebar-link {% if active_section == 'dashboard' %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-chart-line w-4 text-center text-gray-400"></i>
+                <span>Tableau de bord</span>
+            </a>
+
+            <div class="sidebar-section">Catalogue</div>
+            <a href="{% url 'dashboard:products' %}" class="sidebar-link {% if active_section == 'products' and 'categories' not in request.path and 'attributes' not in request.path %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-mobile-screen w-4 text-center text-gray-400"></i>
+                <span>Produits</span>
+            </a>
+            <a href="{% url 'dashboard:categories' %}" class="sidebar-link {% if active_section == 'products' and 'categories' in request.path %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-folder w-4 text-center text-gray-400"></i>
+                <span>Catégories</span>
+            </a>
+            <a href="{% url 'dashboard:attributes' %}" class="sidebar-link {% if active_section == 'products' and 'attributes' in request.path %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-sliders w-4 text-center text-gray-400"></i>
+                <span>Attributs</span>
+            </a>
+            <a href="{% url 'dashboard:stock' %}" class="sidebar-link {% if active_section == 'stock' %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-boxes-stacked w-4 text-center text-gray-400"></i>
+                <span>Stocks & Alertes</span>
+            </a>
+
+            <div class="sidebar-section">Commerce</div>
+            <a href="{% url 'dashboard:orders' %}" class="sidebar-link {% if active_section == 'orders' %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-receipt w-4 text-center text-gray-400"></i>
+                <span>Commandes</span>
+                {% if pending_count %}<span class="badge bg-[#8CC63F]/20 text-green ml-auto">{{ pending_count }}</span>{% endif %}
+            </a>
+            <a href="{% url 'dashboard:reviews' %}" class="sidebar-link {% if active_section == 'reviews' %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-message w-4 text-center text-gray-400"></i>
+                <span>Avis Clients</span>
+                {% if pending_reviews_count %}<span class="badge bg-orange-100 text-orange-600 ml-auto">{{ pending_reviews_count }}</span>{% endif %}
+            </a>
+
+            <div class="sidebar-section">Administration</div>
+            <a href="{% url 'dashboard:users' %}" class="sidebar-link {% if active_section == 'users' and 'livreurs' not in request.path %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-users w-4 text-center text-gray-400"></i>
+                <span>Utilisateurs</span>
+            </a>
+            <a href="{% url 'dashboard:livreur_list' %}" class="sidebar-link {% if active_section == 'users' and 'livreurs' in request.path %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-truck-fast w-4 text-center text-gray-400"></i>
+                <span>Livreurs</span>
+            </a>
+            <a href="/admin/catalog/product/" class="sidebar-link">
+                <i class="nav-icon fa-solid fa-shield-halved w-4 text-center text-gray-400"></i>
+                <span>Django Admin</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-gray-300 ml-auto"></i>
+            </a>
+
+        </nav>
+
+        <!-- Bottom: User + Logout -->
+        <div class="p-4 border-t border-gray-100">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 rounded-full bg-[#8CC63F]/20 flex items-center justify-center text-[#8CC63F] font-bold text-sm">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs font-bold text-gray-900 truncate">{{ user.username }}</p>
+                    <p class="text-[10px] text-gray-400">Administrateur</p>
+                </div>
+            </div>
+            <form method="post" action="{% url 'users:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 font-medium py-2 rounded-lg hover:bg-red-50 transition-colors text-left px-2">
+                    <i class="fa-solid fa-power-off mr-1.5"></i>Déconnexion
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+        <!-- Top Bar -->
+        <header class="bg-white border-b border-gray-100 h-14 flex items-center px-6 gap-4 shrink-0">
+            <h1 class="font-bold text-gray-900 text-base flex-grow">{% block page_title %}Tableau de Bord{% endblock %}</h1>
+            
+            <!-- Alerts shortcut -->
+            {% if low_stock_count %}
+            <a href="{% url 'dashboard:stock' %}" class="flex items-center gap-1.5 text-xs bg-orange-50 text-orange-700 border border-orange-200 rounded-full px-3 py-1.5 font-semibold hover:bg-orange-100 transition-colors">
+                <i class="fa-solid fa-triangle-exclamation text-orange-500"></i>
+                {{ low_stock_count }} alerte(s) stock
+            </a>
+            {% endif %}
+            
+            <a href="/" target="_blank" class="text-xs text-gray-500 hover:text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 font-medium hover:border-gray-300 transition-colors">
+                <i class="fa-solid fa-store mr-1"></i>Voir la boutique
+            </a>
+        </header>
+
+        <!-- Flash messages -->
+        {% if messages %}
+        <div class="px-6 pt-4">
+            {% for message in messages %}
+            <div class="mb-3 px-4 py-3 rounded-lg text-sm font-medium border flex items-center gap-2
+                {% if message.tags == 'error' %}bg-red-50 text-red-800 border-red-200
+                {% elif message.tags == 'success' %}bg-green-50 text-green-800 border-green-200
+                {% else %}bg-blue-50 text-blue-800 border-blue-200{% endif %}">
+                <i class="fa-solid {% if message.tags == 'error' %}fa-circle-xmark{% elif message.tags == 'success' %}fa-circle-check{% else %}fa-circle-info{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto p-6 animate-fade-in">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

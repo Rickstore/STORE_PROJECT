@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<script id="variants-data" type="application/json">
+[
+    {% for variant in product.variants.all %}
+    {
+        "id": "{{ variant.id }}",
+        "color": "{{ variant.color.id }}",
+        "capacity": "{{ variant.capacity.id }}",
+        "price": "{{ variant.price }}",
+        "stocks": [
+            {% for s in variant.stocks.all %}
+            {"city": "{{ s.warehouse.name }}", "qty": {{ s.quantity }}}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+]
+</script>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-50">
+    <!-- Breadcrumb -->
+    <div class="flex items-center text-sm text-gray-500 mb-6">
+        <a href="{% url 'catalog:home' %}" class="hover:text-gray-900">Accueil</a>
+        <span class="mx-2">&rsaquo;</span>
+        <a href="{% url 'catalog:catalog' %}" class="hover:text-gray-900">{{ product.category.name|default:"Smartphones" }}</a>
+        <span class="mx-2">&rsaquo;</span>
+        <span class="text-gray-900">{{ product.name }}</span>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-12 bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-12">
+        <!-- Left: Images -->
+        <div class="lg:w-1/2">
+            <div class="main-image-container bg-[#fcfafa] rounded-2xl p-8 flex items-center justify-center mb-6 h-[500px] relative overflow-hidden group">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="max-w-full max-h-full object-contain mix-blend-multiply drop-shadow-2xl transition-transform duration-300 ease-out cursor-zoom-in">
+                {% else %}
+                    <i class="fa-solid fa-mobile-screen text-9xl text-gray-200 transition-transform duration-300 group-hover:scale-125"></i>
+                {% endif %}
+                <div class="absolute bottom-4 right-4 text-[10px] text-gray-400 font-medium tracking-wide pointer-events-none">Survolez pour zoomer</div>
+            </div>
+            
+            <!-- Thumbnails grid -->
+            <div class="grid grid-cols-4 gap-4">
+                <div class="bg-white border-2 border-[#16A34A] rounded-xl overflow-hidden aspect-square flex items-center justify-center p-2 cursor-pointer">
+                    <!-- Main product thumbnail -->
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="Thumb" class="max-w-full max-h-full object-contain mix-blend-multiply">
+                    {% else %}
+                        <i class="fa-solid fa-mobile-screen text-gray-300 text-3xl"></i>
+                    {% endif %}
+                </div>
+                <!-- Related products thumbnails -->
+                {% for related in related_products %}
+                <a href="{{ related.get_absolute_url }}" class="bg-white border border-gray-100 rounded-xl overflow-hidden aspect-square cursor-pointer flex items-center justify-center p-2 hover:border-[#16A34A] transition-all group" title="{{ related.name }}">
+                    {% if related.image %}
+                        <img src="{{ related.image.url }}" alt="{{ related.name }}" class="max-w-full max-h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform">
+                    {% else %}
+                        <i class="fa-solid fa-mobile-screen text-gray-200 text-2xl"></i>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right: Details -->
+        <div class="lg:w-1/2 flex flex-col pt-4">
+            <div class="mb-4">
+                <span class="inline-block bg-[#E8F5E9] text-[#2E7D32] text-[10px] font-bold px-3 py-1 rounded-full tracking-wider uppercase">NOUVEAU ARRIVAGE</span>
+            </div>
+            
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight leading-tight mb-4">{{ product.name }}</h1>
+            
+            <div class="flex items-center gap-3 mb-6">
+                <div class="flex text-yellow-400 text-sm">
+                    {% for i in "12345" %}
+                    <span>&#9733;</span>
+                    {% endfor %}
+                </div>
+                <span class="text-sm text-gray-500 font-medium">({{ product.review_count|default:"128" }} avis clients)</span>
+            </div>
+            
+            <div class="mb-8">
+                <span class="text-[32px] font-black text-gray-900 tracking-tight" id="product-price">{{ default_variant.price|default:product.price }} FCFA</span>
+            </div>
+            
+            <!-- Colors -->
+            <div class="mb-8">
+                <p class="text-sm font-bold text-gray-900 mb-3" id="color-name-display">Couleur: <span class="font-normal">{{ default_variant.color.name|default:"Sélectionnez" }}</span></p>
+                <div class="flex gap-4">
+                    {% for color in product.available_colors.all %}
+                    <button class="color-selector w-10 h-10 rounded-full border-2 transition-all {% if default_variant and default_variant.color.id == color.id %}border-gray-900{% else %}border-transparent hover:border-gray-400{% endif %}" 
+                            style="background-color: {{ color.code }};" 
+                            title="{{ color.name }}"
+                            data-id="{{ color.id }}"
+                            data-name="{{ color.name }}"></button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Capacity -->
+            <div class="mb-8">
+                <p class="text-sm font-bold text-gray-900 mb-3">Capacité</p>
+                <div class="flex flex-wrap gap-3">
+                    {% for cap in product.available_capacities.all %}
+                    <button class="cap-selector px-5 py-2.5 rounded-full border text-xs font-bold transition-colors {% if default_variant and default_variant.capacity.id == cap.id %}border-[#16A34A] bg-[#F0FDF4] text-[#16A34A]{% else %}border-gray-200 text-gray-700 hover:border-[#16A34A] hover:text-[#16A34A]{% endif %}" data-id="{{ cap.id }}">
+                        {{ cap.value }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Store Availability -->
+            <div class="mb-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-location-dot text-[#16A34A]"></i>
+                    <p class="text-sm font-bold text-gray-900">Disponibilité en magasin</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pl-6" id="stock-info">
+                    {% for stock in default_variant.stocks.all %}
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle text-[6px] {% if stock.quantity > 5 %}text-[#16A34A]{% elif stock.quantity > 0 %}text-orange-500{% else %}text-red-500{% endif %}"></i>
+                            <span class="text-gray-600">{{ stock.warehouse.name }}</span>
+                        </div>
+                        <span class="text-gray-500">
+                            {% if stock.quantity > 5 %} En stock {% elif stock.quantity > 0 %} Restant: {{ stock.quantity }} {% else %} <span class="text-red-500">Rupture</span> {% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Add to Cart -->
+            <div class="flex items-center gap-4 mt-auto">
+                <form action="{% url 'cart:cart_add' product.id %}" method="post" class="flex-grow">
+                    {% csrf_token %}
+                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="variant_id" id="variant-input" value="{{ default_variant.id }}">
+                    <input type="hidden" name="color" id="color-input" value="{{ default_variant.color.name }}">
+                    <input type="hidden" name="capacity" id="capacity-input" value="{{ default_variant.capacity.value }}">
+                    <button type="submit" class="w-full bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-colors shadow-sm shadow-[#22C55E]/20 text-sm tracking-wide">
+                        <i class="fa-solid fa-cart-shopping text-lg text-white"></i>
+                        Ajouter au panier
+                    </button>
+                </form>
+                <button class="w-14 h-14 flex items-center justify-center border border-gray-200 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors text-black shrink-0">
+                    <i class="fa-solid fa-heart text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Specs -->
+    <div class="mb-12">
+        <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <i class="fa-solid fa-microchip text-[#16A34A]"></i>
+            Spécifications techniques
+        </h2>
+        {% if product.specifications.exists %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white dark:bg-[#1E1E1E] rounded-xl shadow-sm border border-gray-100 dark:border-white/5 p-6 col-span-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    {% for spec in product.specifications.all %}
+                    <div class="flex border-b border-gray-50 dark:border-white/5 pb-2">
+                        <span class="w-1/3 text-sm font-bold text-gray-900 dark:text-gray-200">{{ spec.name }}</span>
+                        <span class="w-2/3 text-sm text-gray-600 dark:text-gray-400">{{ spec.value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-white dark:bg-[#1E1E1E] rounded-xl shadow-sm border border-gray-100 dark:border-white/5 p-6 text-center">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Aucune spécification détaillée n'a été ajoutée pour ce produit.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Avis Clients -->
+    <div class="mb-12">
+        <div class="flex justify-between items-end mb-6">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-3">
+                <i class="fa-solid fa-message text-[#16A34A]"></i>
+                Avis Clients
+            </h2>
+        </div>
+        
+        <!-- Formulaire d'avis -->
+        <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            {% if request.user.is_authenticated %}
+                {% if user_has_reviewed %}
+                    <p class="text-gray-600 font-medium"><i class="fa-solid fa-check-circle text-[#16A34A]"></i> Vous avez déjà laissé un avis pour ce produit, merci !</p>
+                {% else %}
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Laissez votre avis</h3>
+                    <form action="{% url 'catalog:product_detail' product.slug %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Note sur 5 <span class="text-red-500">*</span></label>
+                            <div class="flex gap-4">
+                                {% for i in "12345" %}
+                                <label class="cursor-pointer flex items-center gap-1">
+                                    <input type="radio" name="rating" value="{{ forloop.counter }}" required class="text-[#16A34A] focus:ring-[#16A34A] border-gray-300">
+                                    <span class="text-yellow-400">&#9733;</span> <span class="text-sm">{{ forloop.counter }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="comment" class="block text-sm font-bold text-gray-700 mb-2">Commentaire (optionnel)</label>
+                            <textarea name="comment" id="comment" rows="3" class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#16A34A] focus:ring-1 focus:ring-[#16A34A] transition-colors" placeholder="Dites-nous ce que vous pensez de ce produit..."></textarea>
+                        </div>
+                        <button type="submit" class="bg-[#22C55E] hover:bg-[#16A34A] text-white font-bold py-2.5 px-6 rounded-lg transition-colors text-sm">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Soumettre l'avis
+                        </button>
+                    </form>
+                {% endif %}
+            {% else %}
+                <p class="text-gray-600">Vous devez être <a href="{% url 'users:login' %}?next={{ request.path }}" class="text-[#16A34A] font-bold hover:underline">connecté</a> pour laisser un avis.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Liste des avis -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for review in reviews %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
+                <div class="flex gap-4 items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-[#E8F5E9] text-[#2E7D32] flex items-center justify-center font-bold text-sm">
+                        {{ review.user.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-sm leading-tight">{{ review.user.username }}</h4>
+                        <p class="text-[10px] text-gray-400 mt-0.5">{{ review.created_at|date:"d M Y" }}</p>
+                    </div>
+                </div>
+                <div class="flex text-yellow-400 text-xs mb-3">
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= review.rating %}
+                            &#9733;
+                        {% else %}
+                            <span class="text-gray-200">&#9733;</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p class="text-sm text-gray-600 italic leading-relaxed grow">
+                    {% if review.comment %}
+                        "{{ review.comment }}"
+                    {% else %}
+                        <span class="text-gray-400">Aucun commentaire fourni.</span>
+                    {% endif %}
+                </p>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
+                <i class="fa-solid fa-comment-slash text-3xl mb-3 text-gray-300"></i>
+                <p>Aucun avis pour ce produit pour le moment.</p>
+                <p class="text-xs mt-1">Soyez le premier à partager votre expérience !</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const variants = JSON.parse(document.getElementById('variants-data').textContent);
+    const priceDisplay = document.getElementById('product-price');
+    const colorButtons = document.querySelectorAll('.color-selector');
+    const capButtons = document.querySelectorAll('.cap-selector');
+    const colorNameDisplay = document.getElementById('color-name-display');
+    const variantInput = document.getElementById('variant-input');
+    const colorInput = document.getElementById('color-input');
+    const capacityInput = document.getElementById('capacity-input');
+    
+    let selectedColor = "{{ default_variant.color.id|default:'' }}";
+    let selectedCap = "{{ default_variant.capacity.id|default:'' }}";
+
+    function updateDisplay() {
+        // Trouver la variante qui correspond aux deux choix
+        const match = variants.find(v => v.color == selectedColor && v.capacity == selectedCap);
+        
+        // Update styling for colors
+        colorButtons.forEach(btn => {
+            if (btn.dataset.id == selectedColor) {
+                btn.classList.add('border-gray-900');
+                btn.classList.remove('border-transparent', 'hover:border-gray-400');
+                if (colorNameDisplay) {
+                    colorNameDisplay.innerHTML = `Couleur: <span class="font-normal">${btn.dataset.name}</span>`;
+                }
+                if (colorInput) {
+                    colorInput.value = btn.dataset.name;
+                }
+            } else {
+                btn.classList.remove('border-gray-900');
+                btn.classList.add('border-transparent', 'hover:border-gray-400');
+            }
+        });
+
+        // Update styling for capacities
+        capButtons.forEach(btn => {
+            if (btn.dataset.id == selectedCap) {
+                btn.classList.add('border-[#16A34A]', 'bg-[#F0FDF4]', 'text-[#16A34A]');
+                btn.classList.remove('border-gray-200', 'text-gray-700', 'hover:border-[#16A34A]', 'hover:text-[#16A34A]');
+                if (capacityInput) {
+                    capacityInput.value = btn.innerText.trim();
+                }
+            } else {
+                btn.classList.remove('border-[#16A34A]', 'bg-[#F0FDF4]', 'text-[#16A34A]');
+                btn.classList.add('border-gray-200', 'text-gray-700', 'hover:border-[#16A34A]', 'hover:text-[#16A34A]');
+            }
+        });
+
+        if (match) {
+            // Mettre à jour le prix
+            // Format price: e.g. 850000 -> 850,000
+            const formattedPrice = Number(match.price).toLocaleString('en-US').replace(/,/g, ',') + " FCFA";
+            priceDisplay.innerText = formattedPrice;
+            
+            if (variantInput) {
+                variantInput.value = match.id;
+            }
+
+            
+            // Mettre à jour l'affichage des stocks (Douala/Yaoundé)
+            let stockHtml = '';
+            match.stocks.forEach(s => {
+                const colorClass = s.qty > 5 ? 'text-[#16A34A]' : (s.qty > 0 ? 'text-orange-500' : 'text-red-500');
+                let status = '';
+                if (s.qty > 5) status = 'En stock';
+                else if (s.qty > 0) status = 'Restant: ' + s.qty;
+                else status = '<span class="text-red-500">Rupture</span>';
+                
+                stockHtml += `
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle text-[6px] ${colorClass}"></i>
+                            <span class="text-gray-600">${s.city}</span>
+                        </div>
+                        <span class="text-gray-500">${status}</span>
+                    </div>`;
+            });
+            document.getElementById('stock-info').innerHTML = stockHtml;
+        }
+    }
+
+    // Ecouter les clics
+    colorButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedColor = btn.dataset.id;
+            updateDisplay();
+        });
+    });
+
+    capButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            selectedCap = btn.dataset.id;
+            updateDisplay();
+        });
+    });
+
+    // Initialize display on load if we have variants
+    if (variants.length > 0) {
+        if (!selectedColor && colorButtons.length > 0) selectedColor = colorButtons[0].dataset.id;
+        if (!selectedCap && capButtons.length > 0) selectedCap = capButtons[0].dataset.id;
+        updateDisplay();
+    }
+
+    // Image Zoom Logic
+    const mainImageContainer = document.querySelector('.main-image-container');
+    const mainImage = mainImageContainer ? mainImageContainer.querySelector('img') : null;
+    
+    if (mainImageContainer && mainImage) {
+        mainImageContainer.addEventListener('mousemove', function(e) {
+            const rect = mainImageContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+            
+            mainImage.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+            mainImage.style.transform = 'scale(1.8)';
+        });
+        
+        mainImageContainer.addEventListener('mouseleave', function() {
+            mainImage.style.transformOrigin = 'center';
+            mainImage.style.transform = 'scale(1)';
+        });
+    }
+
+
+});
+</script>
+{% endblock %}
