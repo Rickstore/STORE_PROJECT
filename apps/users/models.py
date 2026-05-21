@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
+    """Modèle utilisateur personnalisé avec rôles et attributs spécifiques au livreur."""
     ROLE_CHOICES = (
         ('admin', 'Administrateur'),
         ('client', 'Client'),
@@ -11,16 +12,20 @@ class CustomUser(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Téléphone")
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="Photo de profil")
-    must_change_password = models.BooleanField(default=False, verbose_name="Doit changer son mot de passe")
+    must_reset = models.BooleanField(default=False, verbose_name="Doit réinitialiser son mot de passe", help_text="Cocher pour forcer le changement du mot de passe (ex: '0000')")
+    solde_coll = models.DecimalField(max_digits=12, decimal_places=0, default=0, verbose_name="Solde collecté", help_text="Portefeuille cash pour le livreur (montants encaissés)")
+    is_dispo = models.BooleanField(default=True, verbose_name="Est disponible", help_text="Indique si le livreur est prêt pour de nouvelles courses")
+    ville = models.CharField(max_length=100, blank=True, null=True, verbose_name="Ville")
+    adresse = models.TextField(blank=True, null=True, verbose_name="Adresse détaillée")
     
-    # We already have email, username, password, is_active, date_joined from AbstractUser
-    # Note: date_joined serves as created_at
-    
+    # Les champs email, username, password, is_active, date_joined sont hérités de AbstractUser
+    # Note : date_joined fait office de date de création
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"
     
     @property
     def is_admin_role(self):
+        """Vérifie si l'utilisateur a un rôle d'administrateur ou superutilisateur."""
         return self.role == 'admin' or self.is_superuser
     
     @property
@@ -31,16 +36,8 @@ class CustomUser(AbstractUser):
     def is_livreur_role(self):
         return self.role == 'livreur'
 
-class Address(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='addresses')
-    city = models.CharField(max_length=100, verbose_name="Ville")
-    address = models.TextField(verbose_name="Adresse détaillée")
-    phone = models.CharField(max_length=20, verbose_name="Téléphone")
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        verbose_name = "Adresse"
-        verbose_name_plural = "Adresses"
-        
-    def __str__(self):
-        return f"{self.user.username} - {self.city}"
+    @property
+    def requires_password_reset(self):
+        """Vérifie si l'utilisateur doit être redirigé vers la page de changement de mot de passe."""
+        return self.must_reset
+

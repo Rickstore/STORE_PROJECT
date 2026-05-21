@@ -10,46 +10,366 @@
             <h2 class="text-lg font-bold text-gray-900">Informations du Produit</h2>
             <a href="{% url 'dashboard:products' %}" class="text-sm font-semibold text-gray-500 hover:text-gray-700">Annuler</a>
         </div>
-        
+
+        {% if form.errors %}
+        <div class="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i>
+            <strong>Erreur :</strong> Veuillez corriger les champs ci-dessous.
+            <ul class="mt-1 list-disc list-inside text-xs">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                    <li>{{ field }} : {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" class="p-6 space-y-6">
             {% csrf_token %}
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Name -->
+
+                <!-- Nom du produit -->
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom du Produit</label>
-                    {{ form.name }}
-                    {% if form.name.errors %}<p class="text-red-500 text-[10px] mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nom du Produit *</label>
+                    {{ form.nom_prod }}
+                    {% if form.nom_prod.errors %}<p class="text-red-500 text-[10px] mt-1">{{ form.nom_prod.errors.0 }}</p>{% endif %}
                 </div>
 
-                <!-- Category -->
+                <!-- Marque -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Catégorie</label>
-                    {{ form.category }}
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Marque *</label>
+                    {{ form.marque }}
+                    {% if form.marque.errors %}<p class="text-red-500 text-[10px] mt-1">{{ form.marque.errors.0 }}</p>{% endif %}
+                    
+                    <div id="div_id_autre_marque" class="mt-3 {% if form.marque.value != 'Autre' %}hidden{% endif %}">
+                        <label class="block text-[10px] font-bold text-[#8CC63F] uppercase tracking-wider mb-1">Précisez la marque</label>
+                        {{ form.autre_marque }}
+                    </div>
                 </div>
 
-                <!-- Brand -->
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const marqueSelect = document.getElementById('{{ form.marque.id_for_label }}');
+                        const autreDiv = document.getElementById('div_id_autre_marque');
+                        
+                        if (marqueSelect) {
+                            marqueSelect.addEventListener('change', function() {
+                                if (this.value === 'Autre') {
+                                    autreDiv.classList.remove('hidden');
+                                } else {
+                                    autreDiv.classList.add('hidden');
+                                }
+                            });
+                        }
+                    });
+                </script>
+
+                <!-- Catégorie -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Marque</label>
-                    {{ form.brand }}
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Catégorie *</label>
+                    {{ form.cat_id }}
+                    {% if form.cat_id.errors %}<p class="text-red-500 text-[10px] mt-1">{{ form.cat_id.errors.0 }}</p>{% endif %}
                 </div>
 
-                <!-- Price -->
+                <!-- Prix -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Prix (FCFA)</label>
-                    {{ form.price }}
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Prix unitaire (FCFA) *</label>
+                    {{ form.prix_unit }}
+                    {% if form.prix_unit.errors %}<p class="text-red-500 text-[10px] mt-1">{{ form.prix_unit.errors.0 }}</p>{% endif %}
                 </div>
 
-                <!-- Stock -->
+                <!-- Capacité par défaut -->
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Stock Initial</label>
-                    {{ form.stock }}
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Capacité par défaut</label>
+                    {{ form.capacite }}
                 </div>
+
+                <!-- Couleurs Disponibles -->
+                <div class="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                        <i class="fa-solid fa-palette mr-1 text-[#8CC63F]"></i> Couleurs Disponibles
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                        {% for choice in form.available_colors %}
+                        <label class="flex items-center space-x-2 p-2 bg-white rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-50 shadow-sm transition-all group">
+                            {{ choice.tag }}
+                            <span class="text-xs font-semibold text-gray-600 group-hover:text-gray-900 line-clamp-1">{{ choice.choice_label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Capacités Disponibles -->
+                <div class="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                        <i class="fa-solid fa-hard-drive mr-1 text-[#8CC63F]"></i> Capacités Disponibles
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {% for item in capacity_items %}
+                        <div class="flex flex-col space-y-2 p-3 bg-white rounded-xl border border-gray-100 shadow-sm transition-all group">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" name="available_capacities" value="{{ item.code }}" 
+                                       {% if item.code in form.available_capacities.value %}checked{% endif %}
+                                       class="accent-[#8CC63F]">
+                                <span class="text-sm font-bold text-gray-700">{{ item.label }}</span>
+                            </label>
+                            
+                            <!-- Champ prix spécifique pour cette capacité -->
+                            <div id="price_container_{{ item.code }}" class="{% if item.code not in form.available_capacities.value %}hidden{% endif %} animate-in fade-in slide-in-from-top-1 duration-200">
+                                <div class="relative">
+                                    {{ item.price_field }}
+                                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400">FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const capacitiesGrid = document.querySelectorAll('input[name="available_capacities"]');
+                        capacitiesGrid.forEach(checkbox => {
+                            checkbox.addEventListener('change', function() {
+                                const container = document.getElementById('price_container_' + this.value);
+                                if (container) {
+                                    if (this.checked) {
+                                        container.classList.remove('hidden');
+                                        container.querySelector('input').focus();
+                                    } else {
+                                        container.classList.add('hidden');
+                                    }
+                                }
+                            });
+                        });
+                    });
+                </script>
+
+                <!-- Stock par Variante (Affichage seulement) -->
+                {% if existing_variants %}
+                <div class="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-100 mb-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                        <i class="fa-solid fa-list-check mr-1 text-blue-500"></i> Stocks Actuels par Variante
+                    </label>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[10px]">
+                            <thead>
+                                <tr class="text-gray-400 border-b border-gray-200">
+                                    <th class="text-left py-1">Variante</th>
+                                    <th class="text-center py-1">Douala</th>
+                                    <th class="text-center py-1">Yaoundé</th>
+                                    <th class="text-right py-1">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                {% for v in existing_variants %}
+                                <tr>
+                                    <td class="py-1.5 font-bold text-gray-700">{{ v.label }}</td>
+                                    <td class="py-1.5 text-center">{{ v.stock_douala }}</td>
+                                    <td class="py-1.5 text-center">{{ v.stock_yaounde }}</td>
+                                    <td class="py-1.5 text-right font-black text-blue-600">{{ v.stock }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <div class="shrink-0">{{ form.reset_stocks }}</div>
+                            <div>
+                                <label for="{{ form.reset_stocks.id_for_label }}" class="text-xs font-bold text-amber-800 cursor-pointer">⚠️ Réinitialiser tous les stocks</label>
+                                <p class="text-[10px] text-amber-600 mt-0.5">Si coché, les valeurs ci-dessous écraseront les stocks de TOUTES les variantes.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Stock Douala & Yaoundé -->
+                <div class="md:col-span-2 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="text-xs font-bold text-blue-700 uppercase tracking-wider">
+                            <i class="fa-solid fa-warehouse mr-1"></i> Stock Initial (Appliqué par défaut)
+                        </label>
+                        <button type="button" id="toggle-detailed-stock" class="text-[10px] font-black text-blue-600 bg-white border border-blue-200 px-3 py-1 rounded-full hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                            <i class="fa-solid fa-layer-group mr-1"></i> GÉRER LE STOCK DÉTAILLÉ
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">Douala</label>
+                            {{ form.stk_dla }}
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1.5">Yaoundé</label>
+                            {{ form.stk_yde }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Matrice de Stock Détaillée -->
+                <div id="detailed-stock-section" class="md:col-span-2 hidden animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div class="p-5 bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl relative overflow-hidden">
+                        <!-- Déco fond -->
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-[#8CC63F]/10 blur-3xl rounded-full"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-5">
+                                <div>
+                                    <h3 class="text-sm font-black text-white flex items-center gap-2">
+                                        <span class="w-1.5 h-4 bg-[#8CC63F] rounded-full"></span>
+                                        Stockage Détaillé par Variante
+                                    </h3>
+                                    <p class="text-[10px] text-gray-400 mt-1">Personnalisez le stock pour chaque combinaison spécifique.</p>
+                                </div>
+                                <i class="fa-solid fa-boxes-stacked text-gray-700 text-xl"></i>
+                            </div>
+
+                            <div id="stock-matrix-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                <!-- Généré dynamiquement par JS -->
+                            </div>
+                            
+                            <div id="matrix-empty-msg" class="py-10 text-center">
+                                <i class="fa-solid fa-i-cursor text-gray-700 text-2xl mb-2"></i>
+                                <p class="text-xs text-gray-500">Sélectionnez des couleurs et capacités pour voir la matrice.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+                    .custom-scrollbar::-webkit-scrollbar-track { background: #1a1a1a; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #8CC63F; }
+                </style>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const colorsInput = document.querySelectorAll('input[name="available_colors"]');
+                        const capacitiesInput = document.querySelectorAll('input[name="available_capacities"]');
+                        const globalStkDla = document.getElementById('{{ form.stk_dla.id_for_label }}');
+                        const globalStkYde = document.getElementById('{{ form.stk_yde.id_for_label }}');
+                        
+                        const toggleBtn = document.getElementById('toggle-detailed-stock');
+                        const section = document.getElementById('detailed-stock-section');
+                        const grid = document.getElementById('stock-matrix-grid');
+                        const emptyMsg = document.getElementById('matrix-empty-msg');
+
+                        toggleBtn.addEventListener('click', () => {
+                            section.classList.toggle('hidden');
+                            updateMatrix();
+                        });
+
+                        function updateMatrix() {
+                            const selectedColors = Array.from(colorsInput).filter(i => i.checked).map(i => ({
+                                code: i.value,
+                                label: i.parentElement.querySelector('span').innerText.trim()
+                            }));
+                            const selectedCaps = Array.from(capacitiesInput).filter(i => i.checked).map(i => {
+                                // Capacities don't have a span sibling directly, they have label sibling
+                                return {
+                                    code: i.value,
+                                    label: i.parentElement.querySelector('span').innerText.trim()
+                                };
+                            });
+
+                            if (selectedColors.length === 0 && selectedCaps.length === 0) {
+                                emptyMsg.classList.remove('hidden');
+                                grid.innerHTML = '';
+                                return;
+                            }
+                            emptyMsg.classList.add('hidden');
+
+                            // We need at least one color/cap loop
+                            const colors = selectedColors.length > 0 ? selectedColors : [{code: 'none', label: 'Unique'}];
+                            const caps = selectedCaps.length > 0 ? selectedCaps : [{code: 'none', label: 'Unique'}];
+
+                            let html = '';
+                            colors.forEach(c => {
+                                caps.forEach(cap => {
+                                    const cKey = c.code;
+                                    const capKey = cap.code;
+                                    const variantLabel = (c.code !== 'none' ? c.label : '') + 
+                                                         (c.code !== 'none' && cap.code !== 'none' ? ' / ' : '') + 
+                                                         (cap.code !== 'none' ? cap.label : '');
+                                    
+                                    // Try to find existing values if already in form? 
+                                    // Actually we use global default as placeholder/initial
+                                    const valDla = globalStkDla.value || 0;
+                                    const valYde = globalStkYde.value || 0;
+
+                                    html += `
+                                        <div class="bg-gray-800/40 p-3 rounded-xl border border-gray-700/50 flex flex-col gap-2">
+                                            <div class="flex justify-between items-center px-1">
+                                                <span class="text-[10px] font-black text-[#8CC63F] uppercase tracking-wider truncate max-w-[150px]">${variantLabel}</span>
+                                                <i class="fa-solid fa-shuffle text-gray-700 text-[10px]"></i>
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="relative">
+                                                    <input type="number" name="v_stock_dla_${cKey}_${capKey}" value="${valDla}" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white focus:border-[#8CC63F] outline-none" min="0">
+                                                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-gray-600">DLA</span>
+                                                </div>
+                                                <div class="relative">
+                                                    <input type="number" name="v_stock_yde_${cKey}_${capKey}" value="${valYde}" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white focus:border-[#8CC63F] outline-none" min="0">
+                                                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-bold text-gray-600">YDE</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                });
+                            });
+                            grid.innerHTML = html;
+                        }
+
+                        // Listeners
+                        [...colorsInput, ...capacitiesInput].forEach(i => i.addEventListener('change', () => {
+                            if (!section.classList.contains('hidden')) updateMatrix();
+                        }));
+
+                        // --- Synchronisation des Totaux ---
+                        function recalculateTotals() {
+                            let totalDla = 0;
+                            let totalYde = 0;
+                            const matrixInputs = grid.querySelectorAll('input');
+                            
+                            if (matrixInputs.length === 0) return;
+
+                            matrixInputs.forEach(input => {
+                                const val = parseInt(input.value) || 0;
+                                if (input.name.includes('v_stock_dla_')) totalDla += val;
+                                if (input.name.includes('v_stock_yde_')) totalYde += val;
+                            });
+
+                            globalStkDla.value = totalDla;
+                            globalStkYde.value = totalYde;
+                        }
+
+                        // Délégation d'événement pour les entrées de la matrice
+                        grid.addEventListener('input', (e) => {
+                            if (e.target.tagName === 'INPUT') {
+                                recalculateTotals();
+                            }
+                        });
+                    });
+                </script>
 
                 <!-- Description -->
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Description</label>
                     {{ form.description }}
+                </div>
+
+                <!-- Spécifications techniques -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                        Spécifications Techniques
+                        <span class="text-gray-400 font-normal normal-case ml-1">(une ligne = une spec, ex: Batterie: 5000mAh)</span>
+                    </label>
+                    {{ form.specs }}
                 </div>
 
                 <!-- Image -->
@@ -59,138 +379,32 @@
                         <div class="space-y-1 text-center">
                             <i class="fa-solid fa-image text-gray-300 text-3xl mb-3"></i>
                             <div class="flex text-sm text-gray-600">
-                                {{ form.image }}
+                                {{ form.img_path }}
                             </div>
-                            <p class="text-xs text-gray-400">PNG, JPG up to 10MB</p>
+                            <p class="text-xs text-gray-400">PNG, JPG jusqu'à 10MB</p>
                         </div>
                     </div>
-                    {% if object.image %}
+                    {% if object.img_path %}
                     <div class="mt-3 flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                        <img src="{{ object.image.url }}" class="w-12 h-12 rounded object-cover">
+                        <img src="{{ object.img_path.url }}" class="w-12 h-12 rounded object-cover">
                         <span class="text-xs text-gray-500">Image actuelle</span>
                     </div>
                     {% endif %}
                 </div>
 
-                <!-- Colors & Capacities -->
-                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50 rounded-2xl border border-gray-100 relative">
-                    <a href="{% url 'dashboard:attributes' %}" class="absolute top-4 right-4 text-[10px] bg-white border border-gray-200 px-2 py-1 rounded-md text-gray-500 hover:text-[#8CC63F] hover:border-[#8CC63F] font-bold transition-all" target="_blank">
-                        <i class="fa-solid fa-plus mr-1"></i> Gérer les attributs
-                    </a>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Couleurs Disponibles</label>
-                        <div class="flex flex-wrap gap-4">
-                            {{ form.available_colors }}
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Capacités Disponibles</label>
-                        <div class="flex flex-wrap gap-4">
-                            {{ form.available_capacities }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product Variants (Stock & Price per Combination) -->
-                <div class="md:col-span-2 space-y-4">
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <h3 class="text-sm font-bold text-gray-900">Variantes du Produit (Prix & Stock par option)</h3>
-                        <button type="button" id="add-variant" class="text-xs bg-[#8CC63F] text-white px-3 py-1.5 rounded-lg hover:bg-[#7ab32f] transition-colors font-bold">
-                            <i class="fa-solid fa-plus mr-1"></i> Ajouter une variante
-                        </button>
-                    </div>
-                    
-                    {{ variants.management_form }}
-                    <div id="variants-container" class="space-y-3">
-                        {% for v_form in variants %}
-                        <div class="variant-form-row grid grid-cols-1 md:grid-cols-10 gap-3 items-end p-4 bg-white border border-gray-100 rounded-xl">
-                            {% for hidden in v_form.hidden_fields %}
-                                {{ hidden }}
-                            {% endfor %}
-                            <div class="md:col-span-3">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Couleur</label>
-                                {{ v_form.color }}
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Capacité</label>
-                                {{ v_form.capacity }}
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Prix (FCFA)</label>
-                                {{ v_form.price }}
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Stock</label>
-                                {{ v_form.stock }}
-                            </div>
-                            <div class="md:col-span-1 text-center pb-2">
-                                {% if v_form.instance.pk %}
-                                    <div class="flex flex-col items-center">
-                                        {{ v_form.DELETE }}
-                                        <span class="text-[9px] text-red-400 font-bold uppercase mt-1">Suppr.</span>
-                                    </div>
-                                {% else %}
-                                    <button type="button" class="remove-row text-red-300 hover:text-red-500">
-                                        <i class="fa-solid fa-circle-xmark"></i>
-                                    </button>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <p class="text-[10px] text-gray-400 italic">Note: Le prix et le stock ci-dessus remplacent les valeurs générales si une variante est sélectionnée par le client.</p>
-                </div>
-
-                <!-- Dynamic Specifications -->
-                <div class="md:col-span-2 space-y-4">
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                        <h3 class="text-sm font-bold text-gray-900">Spécifications Techniques</h3>
-                        <button type="button" id="add-spec" class="text-xs bg-black text-white px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors font-bold">
-                            <i class="fa-solid fa-plus mr-1"></i> Ajouter une ligne
-                        </button>
-                    </div>
-                    
-                    {{ specifications.management_form }}
-                    <div id="specs-container" class="space-y-3">
-                        {% for spec_form in specifications %}
-                        <div class="spec-form-row grid grid-cols-1 md:grid-cols-7 gap-3 items-center p-3 bg-white border border-gray-100 rounded-xl relative">
-                            {% for hidden in spec_form.hidden_fields %}
-                                {{ hidden }}
-                            {% endfor %}
-                            <div class="md:col-span-3">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nom (ex: Batterie)</label>
-                                {{ spec_form.name }}
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Valeur (ex: 5000mAh)</label>
-                                {{ spec_form.value }}
-                            </div>
-                            <div class="md:col-span-1 pt-4 text-center">
-                                {% if specifications.can_delete %}
-                                    <div class="flex items-center gap-2">
-                                        {{ spec_form.DELETE }}
-                                        <span class="text-[10px] text-red-400 font-bold uppercase">Suppr.</span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Status -->
+                <!-- Statuts -->
                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="flex items-center gap-2 p-4 bg-[#8CC63F]/5 rounded-xl border border-[#8CC63F]/10">
                         {{ form.is_active }}
-                        <label for="{{ form.is_active.id_for_label }}" class="text-sm font-bold text-gray-700">Produit actif</label>
+                        <label for="{{ form.is_active.id_for_label }}" class="text-sm font-bold text-gray-700 cursor-pointer">Produit actif</label>
                     </div>
                     <div class="flex items-center gap-2 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                        {{ form.is_second_hand }}
-                        <label for="{{ form.is_second_hand.id_for_label }}" class="text-sm font-bold text-blue-700">Seconde Main</label>
+                        {{ form.is_2ndmain }}
+                        <label for="{{ form.is_2ndmain.id_for_label }}" class="text-sm font-bold text-blue-700 cursor-pointer">Seconde Main</label>
                     </div>
                     <div class="flex items-center gap-2 p-4 bg-orange-50 rounded-xl border border-orange-100">
                         {{ form.fast_deal }}
-                        <label for="{{ form.fast_deal.id_for_label }}" class="text-sm font-bold text-orange-700">Fast Deal</label>
+                        <label for="{{ form.fast_deal.id_for_label }}" class="text-sm font-bold text-orange-700 cursor-pointer">Fast Deal</label>
                     </div>
                 </div>
             </div>
@@ -198,115 +412,10 @@
             <div class="pt-6 border-t border-gray-50">
                 <button type="submit" class="w-full bg-[#8CC63F] hover:bg-[#7ab32f] text-black font-black py-4 rounded-xl shadow-lg shadow-[#8CC63F]/20 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Enregistrer le Produit & Spécifications
+                    Enregistrer le Produit
                 </button>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Universal function to add row to formsets
-        function setupFormset(addBtnId, containerId, totalFormsId, rowClass) {
-            const addBtn = document.getElementById(addBtnId);
-            const container = document.getElementById(containerId);
-            const totalForms = document.getElementById(totalFormsId);
-            
-            if (!addBtn || !container || !totalForms) return;
-
-            addBtn.addEventListener('click', function() {
-                const currentCount = parseInt(totalForms.value);
-                const rows = container.querySelectorAll('.' + rowClass);
-                const template = rows[rows.length - 1].cloneNode(true);
-                
-                const prefix = totalFormsId.split('-')[0].replace('id_', '');
-
-                // Clear inputs and update IDs/Names
-                template.querySelectorAll('input, select, textarea').forEach(input => {
-                    input.value = '';
-                    if (input.type === 'checkbox') input.checked = false;
-                    
-                    const nameRegex = new RegExp(`${prefix}-\\d+-`, 'g');
-                    const idRegex = new RegExp(`id_${prefix}-\\d+-`, 'g');
-
-                    if (input.name) input.name = input.name.replace(nameRegex, `${prefix}-${currentCount}-`);
-                    if (input.id) input.id = input.id.replace(idRegex, `id_${prefix}-${currentCount}-`);
-                });
-                
-                // Update labels
-                template.querySelectorAll('label').forEach(label => {
-                    const forAttr = label.getAttribute('for');
-                    if (forAttr) {
-                        const idRegex = new RegExp(`id_${prefix}-\\d+-`, 'g');
-                        label.setAttribute('for', forAttr.replace(idRegex, `id_${prefix}-${currentCount}-`));
-                    }
-                });
-
-                // Remove logic for new rows
-                const deleteSection = template.querySelector('.text-center');
-                if (deleteSection) {
-                    deleteSection.innerHTML = `
-                        <button type="button" class="remove-row text-red-300 hover:text-red-500">
-                            <i class="fa-solid fa-circle-xmark"></i>
-                        </button>
-                    `;
-                    deleteSection.querySelector('.remove-row').addEventListener('click', function() {
-                        template.remove();
-                        // Optional: decrease totalForms.value but Django FormSet usually expects continuous indexing or specific management. Better just leave it or handle it carefully.
-                    });
-                }
-
-                container.appendChild(template);
-                totalForms.value = currentCount + 1;
-            });
-
-            // Delegate delete for new rows already present (extra=1)
-            container.addEventListener('click', function(e) {
-                if (e.target.closest('.remove-row')) {
-                    const row = e.target.closest('.' + rowClass);
-                    const rows = container.querySelectorAll('.' + rowClass);
-                    if (rows.length > 1) {
-                        row.remove();
-                    }
-                }
-            });
-        }
-
-        setupFormset('add-spec', 'specs-container', 'id_specifications-TOTAL_FORMS', 'spec-form-row');
-        setupFormset('add-variant', 'variants-container', 'id_variants-TOTAL_FORMS', 'variant-form-row');
-    });
-</script>
-<style>
-    /* Styling for checkboxes in Grid */
-    ul#id_available_colors, ul#id_available_capacities {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-    ul#id_available_colors li, ul#id_available_capacities li {
-        list-style: none;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: white;
-        padding: 0.5rem 0.75rem;
-        border-radius: 0.75rem;
-        border: 1px solid #f3f4f6;
-        font-size: 0.825rem;
-        font-weight: 600;
-        color: #374151;
-        transition: all 0.2s;
-    }
-    ul#id_available_colors li:hover, ul#id_available_capacities li:hover {
-        border-color: #8CC63F;
-        background: #8CC63F08;
-    }
-    input[type="checkbox"] {
-        accent-color: #8CC63F;
-        width: 1rem;
-        height: 1rem;
-        cursor: pointer;
-    }
-</style>
 {% endblock %}

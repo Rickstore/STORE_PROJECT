@@ -1,84 +1,72 @@
 from django.db import models
 from django.conf import settings
-from apps.catalog.models import Product, Store
-from apps.users.models import Address
+from apps.catalog.models import Product, ProductVariant, Store
 import uuid
 
+
 class Order(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'En attente'),
-        ('confirmed', 'Confirmée'),
-        ('assigned', 'Assignée'),
-        ('delivering', 'En cours de livraison'),
-        ('delivered', 'Livrée'),
-        ('failed', 'Échouée'),
+    STATUT_CHOICES = (
+        ('en_attente', 'En attente'),
+        ('valide', 'Payée'),
+        ('expedie', 'En chemin'),
+        ('livre', 'Livrée'),
+        ('retrait_valide', 'Retrait Validé'),
+        ('annule', 'Annulée'),
     )
 
-    DELIVERY_CHOICES = (
-        ('delivery', 'Livraison à domicile'),
-        ('pickup', 'Retrait en magasin'),
+    PAY_MODE_CHOICES = (
+        ('orange', 'Orange Money'),
+        ('mtn', 'MTN MoMo'),
+        ('cash', 'Cash à la livraison'),
+        ('nelsius', 'Nelsius'),
+        ('fashi', 'Fashi'),
     )
 
-    PAYMENT_STATUS_CHOICES = (
-        ('pending', 'En attente'),
-        ('paid', 'Payé'),
-        ('failed', 'Échoué'),
-    )
-
+    client_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', verbose_name="Client")
+    mt_total = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Montant Total")
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente', verbose_name="Statut")
+    pay_mode = models.CharField(max_length=20, choices=PAY_MODE_CHOICES, default='cash', verbose_name="Mode de paiement")
+    date_com = models.DateTimeField(auto_now_add=True, verbose_name="Date de commande")
+    delivery_code = models.CharField(max_length=6, blank=True, null=True, verbose_name="Code de Livraison")
     order_number = models.CharField(max_length=50, unique=True, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders', verbose_name="Client")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Statut")
-    total = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Total")
-    
-    delivery_type = models.CharField(max_length=20, choices=DELIVERY_CHOICES, verbose_name="Type de livraison")
-    store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Magasin de retrait")
-    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Adresse de livraison")
-    
-    assigned_delivery = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        limit_choices_to={'role': 'livreur'},
-        related_name='deliveries',
-        verbose_name="Livreur assigné"
-    )
-    delivery_notes = models.TextField(blank=True, null=True, verbose_name="Notes de livraison / Incidents")
-    delivery_code = models.CharField(max_length=4, blank=True, null=True, verbose_name="Code de confirmation")
-    delivery_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Frais de livraison")
-    
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending', verbose_name="Statut du paiement")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Dernière mise à jour")
+    store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', verbose_name="Boutique")
 
     class Meta:
         verbose_name = "Commande"
         verbose_name_plural = "Commandes"
-        ordering = ['-created_at']
+        ordering = ['-date_com']
 
     def __str__(self):
         return f"Commande {self.order_number}"
 
     def save(self, *args, **kwargs):
         if not self.order_number:
-            self.order_number = f"CMD-{uuid.uuid4().hex[:8].upper()}"
+            uid = uuid.uuid4().hex.upper()
+            self.order_number = f"CMD-{uid[:8]}"
+        # delivery_code is only generated for home deliveries, handled in OrderService
         super().save(*args, **kwargs)
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.RESTRICT, related_name='order_items')
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Prix unitaire")
+    # FK vers la variante choisie (nullable pour compatibilité avec les anciennes commandes)
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='order_items',
+        verbose_name="Variante"
+    )
+    price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name="Prix unitaire")
     quantity = models.PositiveIntegerField(default=1, verbose_name="Quantité")
-    
-    # Nouvelles informations pour les variantes
-    color = models.CharField(max_length=100, blank=True, null=True, verbose_name="Couleur")
-    capacity = models.CharField(max_length=100, blank=True, null=True, verbose_name="Capacité")
+    # Gardés pour l'historique lisible (même si la variante est supprimée)
+    color = models.CharField(max_length=50, blank=True, null=True, verbose_name="Couleur choisie")
+    capacity = models.CharField(max_length=50, blank=True, null=True, verbose_name="Capacité choisie")
 
     def __str__(self):
-        desc = f"{self.quantity}x {self.product.name}"
-        if self.color or self.capacity:
-            desc += f" ({self.color or ''} {self.capacity or ''})".strip()
-        return desc
+        variant_label = f" ({self.color}/{self.capacity})" if (self.color or self.capacity) else ""
+        return f"{self.quantity}x {self.product.nom_prod}{variant_label}"
 
     def get_cost(self):
         return self.price * self.quantity

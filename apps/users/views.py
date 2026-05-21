@@ -4,11 +4,9 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from .models import CustomUser, Address
+from .models import CustomUser
 from .forms import UserUpdateForm
 from apps.orders.models import Order
-import io
-
 
 def register_view(request):
     if request.user.is_authenticated:
@@ -66,7 +64,7 @@ def login_view(request):
                 return redirect('dashboard:index')
             elif user.role == 'livreur':
                 # Force password change on first login
-                if user.must_change_password:
+                if getattr(user, 'requires_password_reset', False):
                     return redirect('delivery:force_change_password')
                 return redirect('delivery:dashboard')
             else:
@@ -115,56 +113,33 @@ def profile_view(request):
                 messages.success(request, "Mot de passe modifié avec succès.")
         return redirect('users:profile')
 
-    addresses = user.addresses.all()
     orders_count = user.orders.count()
     context = {
         'user': user,
-        'addresses': addresses,
         'orders_count': orders_count,
     }
     return render(request, 'users/profile.html', context)
 
 
-@login_required(login_url='/auth/login/')
-def address_create(request):
-    if request.method == 'POST':
-        city = request.POST.get('city', '').strip()
-        address_text = request.POST.get('address', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        if city and address_text and phone:
-            Address.objects.create(
-                user=request.user,
-                city=city,
-                address=address_text,
-                phone=phone
-            )
-            messages.success(request, "Adresse ajoutée.")
-        else:
-            messages.error(request, "Veuillez remplir tous les champs.")
-    return redirect('users:profile')
-
-
-@login_required(login_url='/auth/login/')
-def address_delete(request, pk):
-    address = get_object_or_404(Address, pk=pk, user=request.user)
-    if request.method == 'POST':
-        address.delete()
-        messages.success(request, "Adresse supprimée.")
-    return redirect('users:profile')
-
 
 @login_required(login_url='/auth/login/')
 def order_history_view(request):
-    orders = request.user.orders.prefetch_related('items__product').order_by('-created_at')
+    orders = request.user.orders.prefetch_related('items__product').order_by('-date_com')
     return render(request, 'users/order_history.html', {'orders': orders})
 
 
 @login_required(login_url='/auth/login/')
 def order_track_view(request, order_number):
-    order = get_object_or_404(Order, order_number=order_number, user=request.user)
-    # Build a status timeline
-    status_steps = ['pending', 'confirmed', 'assigned', 'delivering', 'delivered']
-    current_idx = status_steps.index(order.status) if order.status in status_steps else -1
+    order = get_object_or_404(Order, order_number=order_number, client_id=request.user)
+    # Map STATUT_CHOICES keys to a display timeline
+    status_steps = ['en_attente', 'valide', 'assigne', 'expedie', 'livre']
+    
+    if order.statut == 'valide' and hasattr(order, 'delivery') and order.delivery and order.delivery.livreur_id:
+        current_idx = 2
+    else:
+        mapping = {'en_attente': 0, 'valide': 1, 'expedie': 3, 'livre': 4}
+        current_idx = mapping.get(order.statut, -1)
+        
     context = {
         'order': order,
         'status_steps': status_steps,
@@ -176,27 +151,28 @@ def order_track_view(request, order_number):
 @login_required(login_url='/auth/login/')
 def invoice_download(request, order_number):
     """Generate a simple text invoice for the order."""
-    order = get_object_or_404(Order, order_number=order_number, user=request.user)
-    
-    lines = []
+    order = get_object_or_404(Order, order_number=order_number, client_id=request.user)
+    client = order.client_id
+
+    lines: list[str] = []
     lines.append("=" * 50)
     lines.append("         FACTURE - AUDSTOREsarl")
     lines.append("=" * 50)
     lines.append(f"Référence    : {order.order_number}")
-    lines.append(f"Date         : {order.created_at.strftime('%d/%m/%Y à %H:%M')}")
-    lines.append(f"Client       : {order.user.username}")
-    lines.append(f"Email        : {order.user.email}")
-    lines.append(f"Téléphone    : {order.user.phone or '—'}")
+    lines.append(f"Date         : {order.date_com.strftime('%d/%m/%Y à %H:%M')}")
+    lines.append(f"Client       : {client.username}")
+    lines.append(f"Email        : {client.email}")
+    lines.append(f"Téléphone    : {client.phone or '—'}")
     lines.append("-" * 50)
     lines.append("ARTICLES COMMANDÉS")
     lines.append("-" * 50)
     for item in order.items.all():
-        lines.append(f"  {item.product.name}")
+        lines.append(f"  {item.product.nom_prod}")
         lines.append(f"    {item.quantity} x {item.price:,.0f} FCFA = {item.get_cost():,.0f} FCFA")
     lines.append("-" * 50)
-    lines.append(f"  TOTAL             : {order.total:,.0f} FCFA")
-    lines.append(f"  Mode de livraison : {order.get_delivery_type_display()}")
-    lines.append(f"  Statut paiement   : {order.get_payment_status_display()}")
+    lines.append(f"  TOTAL             : {order.mt_total:,.0f} FCFA")
+    lines.append(f"  Mode de paiement  : {order.get_pay_mode_display()}")
+    lines.append(f"  Statut commande   : {order.get_statut_display()}")
     lines.append("=" * 50)
     lines.append("   Merci pour votre confiance !")
     lines.append("   AUDSTOREsarl | +237 6 57 29 24 63")

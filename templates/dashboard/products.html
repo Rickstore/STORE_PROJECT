@@ -72,7 +72,8 @@
                     <th class="px-5 py-3 text-left">Produit</th>
                     <th class="px-5 py-3 text-left">Marque / Catégorie</th>
                     <th class="px-5 py-3 text-right">Prix</th>
-                    <th class="px-5 py-3 text-center">Stock</th>
+                    <th class="px-5 py-3 text-center">Stock DLA</th>
+                    <th class="px-5 py-3 text-center">Stock YDE</th>
                     <th class="px-5 py-3 text-center">Statut</th>
                     <th class="px-5 py-3 text-center">Actions</th>
                 </tr>
@@ -82,27 +83,33 @@
                 <tr class="hover:bg-gray-50/50 group">
                     <td class="px-5 py-3.5">
                         <div class="flex items-center gap-3">
-                            {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-9 h-9 rounded-lg object-cover border border-gray-100 shrink-0">
+                            {% if product.img_path %}
+                            <img src="{{ product.img_path.url }}" alt="{{ product.nom_prod }}" class="w-9 h-9 rounded-lg object-cover border border-gray-100 shrink-0">
                             {% else %}
-                            <div class="w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-mobile text-gray-300 text-sm"></i>
+                            <div class="w-9 h-9 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                                <i class="fa-solid fa-image text-gray-300"></i>
                             </div>
                             {% endif %}
                             <div class="min-w-0">
-                                <p class="font-semibold text-gray-900 truncate max-w-[200px]">{{ product.name }}</p>
-                                <p class="text-[10px] text-gray-400 font-mono">{{ product.slug }}</p>
+                                <p class="font-semibold text-gray-900 truncate max-w-[200px]">{{ product.nom_prod }}</p>
+                                <p class="text-[10px] text-gray-400 font-mono">{{ product.groupe_id }}</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-5 py-3.5">
-                        <p class="font-medium text-gray-700 text-xs">{{ product.brand|default:"—" }}</p>
-                        <p class="text-[10px] text-gray-400">{{ product.category.name|default:"—" }}</p>
+                        <p class="font-medium text-gray-700 text-xs">{{ product.cat_id.nom_cat|default:"—" }}</p>
+                        <p class="text-[10px] text-gray-400">{{ product.cat_id.nom_cat|default:"—" }}</p>
                     </td>
-                    <td class="px-5 py-3.5 text-right font-bold text-gray-900">{{ product.price|floatformat:0 }} <span class="text-xs text-gray-400 font-normal">FCFA</span></td>
+                    <td class="px-5 py-3.5 text-right font-bold text-gray-900">{{ product.prix_unit|floatformat:0 }} <span class="text-xs text-gray-400 font-normal">FCFA</span></td>
                     <td class="px-5 py-3.5 text-center">
-                        <span class="font-bold text-sm {% if product.stock == 0 %}text-red-600{% elif product.stock <= 5 %}text-orange-600{% else %}text-gray-900{% endif %}">
-                            {{ product.stock }}
+                        <span class="font-bold text-sm {% if product.stk_dla == 0 %}text-red-600 animate-pulse{% elif product.stk_dla <= 5 %}text-orange-600{% else %}text-gray-900{% endif %}">
+                            {% if product.stk_dla == 0 %}<i class="fa-solid fa-triangle-exclamation mr-1"></i>{% endif %}{{ product.stk_dla }}
+                        </span>
+                        <span class="text-xs text-gray-400"> u.</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-center">
+                        <span class="font-bold text-sm {% if product.stk_yde == 0 %}text-red-600 animate-pulse{% elif product.stk_yde <= 5 %}text-orange-600{% else %}text-gray-900{% endif %}">
+                            {% if product.stk_yde == 0 %}<i class="fa-solid fa-triangle-exclamation mr-1"></i>{% endif %}{{ product.stk_yde }}
                         </span>
                         <span class="text-xs text-gray-400"> u.</span>
                     </td>
@@ -124,7 +131,7 @@
                                     <i class="fa-solid {% if product.is_active %}fa-eye-slash{% else %}fa-eye{% endif %}"></i>
                                 </button>
                             </form>
-                            <form method="post" class="inline" onsubmit="return confirm('Supprimer ce produit ?')">
+                            <form method="post" class="inline" data-confirm="Supprimer ce produit ?">
                                 {% csrf_token %}
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="product_id" value="{{ product.id }}">

@@ -4,7 +4,15 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Finaliser la commande</h1>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Finaliser la commande</h1>
+        {% if is_sandbox %}
+        <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-2 rounded-xl text-sm font-bold animate-pulse">
+            <i class="fa-solid fa-flask-vial"></i>
+            <span>Mode Simulation (Sandbox) Activé</span>
+        </div>
+        {% endif %}
+    </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Informations de Checkout -->
@@ -37,8 +45,8 @@
                     
                     <div class="grid grid-cols-1 gap-4">
                         <div>
-                            <label for="city" class="block text-sm font-medium text-gray-700">Ville *</label>
-                            <input type="text" name="city" id="city" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border">
+                            <label for="city" class="block text-sm font-medium text-gray-700">Ville de livraison *</label>
+                            <input type="text" name="city" id="city" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Entrez votre ville (ex: Bafoussam, Kribi...)">
                         </div>
                         <div>
                             <label for="address" class="block text-sm font-medium text-gray-700">Adresse complète *</label>
@@ -60,6 +68,8 @@
                         <select name="store_id" id="store_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-green focus:border-brand-green sm:text-sm rounded-md border">
                             {% for store in stores %}
                                 <option value="{{ store.id }}">{{ store.name }} - {{ store.city }}</option>
+                            {% empty %}
+                                <option value="" disabled>-- Aucun magasin n'est configuré --</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -95,24 +105,17 @@
                         </label>
                     </div>
 
-                    <!-- Orange Money Field -->
-                    <div id="orange-field" class="mb-4">
-                        <label for="payment_phone" class="block text-sm font-medium text-gray-700">Numéro Orange Money *</label>
-                        <input type="tel" name="payment_phone" id="payment_phone" value="{{ user.phone }}" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Ex: 69XXXXXXX">
-                        <p class="mt-1 text-xs text-gray-500">Un popup s'affichera sur votre téléphone pour confirmer la transaction via l'API.</p>
-                    </div>
-
-                    <!-- MTN Instructions -->
-                    <div id="mtn-instructions" class="hidden mb-4 p-4 bg-[#FFCC00]/10 border border-[#FFCC00] rounded-lg">
-                        <p class="font-bold text-gray-800 text-center text-lg">
-                            <i class="fa-solid fa-mobile-screen-button text-[#FFCC00] mr-2"></i>
-                            Paiement via <span class="text-xl mx-1 font-black underline">677680366</span> (MTN)
+                    <!-- Payment/Contact Phone Field (Always Required) -->
+                    <div id="network-payment-field" class="mb-4">
+                        <label for="payment_phone" class="block text-sm font-medium text-gray-700">Numéro de téléphone (Compte ou Contact) *</label>
+                        <input type="tel" name="payment_phone" id="payment_phone" value="{{ user.phone }}" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Ex: 6XXXXXXXX">
+                        <p id="payment-field-help" class="mt-1 text-xs text-gray-500">
+                            {% if is_sandbox %}
+                            <span class="text-amber-600 font-bold">[SIMULATION]</span> Aucun débit réel ne sera effectué.
+                            {% else %}
+                            Ce numéro permet de vous contacter ou d'initier le paiement mobile.
+                            {% endif %}
                         </p>
-                        <p class="text-sm text-center text-gray-600 mt-2">Veuillez effectuer le dépôt sur ce numéro, puis entrer le numéro depuis lequel vous avez effectué l'opération ci-dessous.</p>
-                        <div class="mt-4">
-                             <label for="mtn_phone" class="block text-sm font-medium text-gray-700">Numéro MTN de la transaction *</label>
-                             <input type="tel" name="mtn_phone" id="mtn_phone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-brand-green focus:border-brand-green sm:text-sm p-2 border" placeholder="Ex: 67XXXXXXX">
-                        </div>
                     </div>
 
                     <!-- Cash on Delivery Notice -->
@@ -150,10 +153,17 @@
                 
                 <ul class="divide-y divide-gray-200 mb-6">
                     {% for item in cart %}
-                    <li class="py-3 flex justify-between">
-                        <div class="truncate pr-2">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ item.product.name }}</p>
-                            <p class="text-xs text-gray-500">Qté: {{ item.quantity }}</p>
+                    <li class="py-3 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center shrink-0">
+                                {% if item.product.img_path %}
+                                <img src="{{ item.product.img_path.url }}" class="max-w-full max-h-full object-contain p-1">
+                                {% endif %}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ item.product.nom_prod }}</p>
+                                <p class="text-xs text-gray-500">Qté: {{ item.quantity }}</p>
+                            </div>
                         </div>
                         <span class="text-sm font-medium text-gray-900 whitespace-nowrap">{{ item.total_price }} FCFA</span>
                     </li>
@@ -223,36 +233,26 @@
     }
 
     function togglePaymentFields(provider) {
-        const orangeField = document.getElementById('orange-field');
-        const mtnInstructions = document.getElementById('mtn-instructions');
+        const networkField = document.getElementById('network-payment-field');
         const cashNotice = document.getElementById('cash-notice');
         const cashBadge = document.getElementById('cash-badge');
-        const paymentPhone = document.getElementById('payment_phone');
-        const mtnPhone = document.getElementById('mtn_phone');
+        const paymentFieldHelp = document.getElementById('payment-field-help');
         const payBtn = document.getElementById('pay-btn');
         const isDelivery = document.querySelector('input[name="delivery_type"]:checked')?.value === 'delivery';
         const currentTotal = isDelivery ? baseTotal + 1000 : baseTotal;
 
-        // Reset all
-        orangeField.classList.add('hidden');
-        mtnInstructions.classList.add('hidden');
+        // Reset display
         cashNotice.classList.add('hidden');
         cashBadge.classList.add('hidden');
-        paymentPhone.required = false;
-        mtnPhone.required = false;
 
-        if (provider === 'orange') {
-            orangeField.classList.remove('hidden');
-            paymentPhone.required = true;
+        if (provider === 'orange' || provider === 'mtn') {
             payBtn.innerText = "Payer " + currentTotal + " FCFA";
-        } else if (provider === 'mtn') {
-            mtnInstructions.classList.remove('hidden');
-            mtnPhone.required = true;
-            payBtn.innerText = "Payer " + currentTotal + " FCFA";
+            paymentFieldHelp.innerHTML = `Ce numéro permet d'initier le paiement mobile <strong>${provider === 'orange' ? 'Orange Money' : 'MTN MoMo'}</strong>.`;
         } else if (provider === 'cash') {
             cashNotice.classList.remove('hidden');
             cashBadge.classList.remove('hidden');
             payBtn.innerText = "Confirmer la commande (" + currentTotal + " FCFA à la livraison)";
+            paymentFieldHelp.innerHTML = "Ce numéro sera utilisé par le livreur pour vous contacter lors de la livraison.";
         }
     }
 </script>

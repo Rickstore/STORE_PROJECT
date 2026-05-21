@@ -6,7 +6,8 @@ app_name = 'cart'
 urlpatterns = [
     path('', views.cart_detail, name='cart_detail'),
     path('add/<int:product_id>/', views.cart_add, name='cart_add'),
-    path('add-ajax/<int:product_id>/', views.cart_add_ajax, name='cart_add_ajax'),
-    path('remove/<int:product_id>/', views.cart_remove, name='cart_remove'),
+    path('add-ajax/<int:product_id>/', views.cart_add, name='cart_add_ajax'),
+    path('update-ajax/<str:item_key>/', views.cart_update_ajax, name='cart_update_ajax'),
+    path('remove/<str:item_key>/', views.cart_remove, name='cart_remove'),
     path('clear/', views.cart_clear, name='cart_clear'),
 ]

@@ -108,50 +108,7 @@
                 </form>
             </div>
 
-            <!-- Addresses -->
-            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h2 class="font-bold text-gray-900 text-sm mb-4 pb-2 border-b border-gray-100">Mes adresses de livraison</h2>
 
-                {% if addresses %}
-                <div class="space-y-3 mb-4">
-                    {% for addr in addresses %}
-                    <div class="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                            <p class="font-semibold text-gray-900 text-sm">{{ addr.city }}</p>
-                            <p class="text-xs text-gray-500">{{ addr.address }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5"><i class="fa-solid fa-phone text-[9px]"></i> {{ addr.phone }}</p>
-                        </div>
-                        <form method="post" action="{% url 'users:address_delete' addr.pk %}" onsubmit="return confirm('Supprimer cette adresse ?')">
-                            {% csrf_token %}
-                            <button type="submit" class="text-red-400 hover:text-red-600 text-xs font-medium mt-0.5">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p class="text-sm text-gray-400 mb-4">Aucune adresse enregistrée.</p>
-                {% endif %}
-
-                <!-- Add address form -->
-                <details class="group">
-                    <summary class="cursor-pointer text-sm font-bold text-[#8CC63F] hover:underline list-none flex items-center gap-1">
-                        <i class="fa-solid fa-plus text-xs"></i> Ajouter une adresse
-                    </summary>
-                    <form method="post" action="{% url 'users:address_create' %}" class="mt-3 space-y-3">
-                        {% csrf_token %}
-                        <input type="text" name="city" placeholder="Ville (ex: Douala, Yaoundé)" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8CC63F]">
-                        <textarea name="address" rows="2" placeholder="Quartier, rue, repère..." required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8CC63F] resize-none"></textarea>
-                        <input type="tel" name="phone" placeholder="Téléphone de livraison" required class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8CC63F]">
-                        <button type="submit" class="bg-[#8CC63F] hover:bg-[#7ab32f] text-black font-bold px-4 py-2 rounded-lg text-sm transition-colors">
-                            Ajouter l'adresse
-                        </button>
-                    </form>
-                </details>
-            </div>
-
-        </div>
     </div>
 </div>
 {% endblock %}

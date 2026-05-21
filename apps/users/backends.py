@@ -5,10 +5,7 @@ UserModel = get_user_model()
 
 
 class EmailBackend(ModelBackend):
-    """
-    Custom authentication backend that allows users to log in using their
-    email address instead of their username.
-    """
+   
 
     def authenticate(self, request, email=None, password=None, **kwargs):
         # Support being called with username= kwarg (e.g. from older code paths)

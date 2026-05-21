@@ -11,8 +11,7 @@ urlpatterns = [
 
     # Client account
     path('profile/', views.profile_view, name='profile'),
-    path('profile/address/add/', views.address_create, name='address_create'),
-    path('profile/address/<int:pk>/delete/', views.address_delete, name='address_delete'),
+
     path('orders/', views.order_history_view, name='order_history'),
     path('orders/<str:order_number>/track/', views.order_track_view, name='order_track'),
     path('orders/<str:order_number>/invoice/', views.invoice_download, name='invoice_download'),

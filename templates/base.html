@@ -52,30 +52,40 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        body, .bg-white, .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .border-gray-100, .border-gray-200, .bg-gray-50, .bg-gray-100 {
+        body,
+        .bg-white,
+        .text-gray-900,
+        .text-gray-800,
+        .text-gray-700,
+        .text-gray-600,
+        .text-gray-500,
+        .border-gray-100,
+        .border-gray-200,
+        .bg-gray-50,
+        .bg-gray-100 {
             transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, opacity 0.5s ease !important;
         }
 
         /* Override Tailwind Defaults for Dark Mode */
         .bg-white {
-            background-color: var(--card-bg) !important;
+            background-color: var(--card-bg);
         }
 
         .text-gray-900,
         .text-gray-800,
         .text-gray-700 {
-            color: var(--text-main) !important;
+            color: var(--text-main);
         }
 
         .text-gray-600,
         .text-gray-500 {
-            color: var(--text-main) !important;
+            color: var(--text-main);
             opacity: 0.7;
         }
 
         .border-gray-100,
         .border-gray-200 {
-            border-color: var(--border-color) !important;
+            border-color: var(--border-color);
         }
 
         /* Premium Transitions */
@@ -182,49 +192,59 @@
 
         /* ── Icônes de changement de thème ──────────────────────────────── */
         #icon-sun {
-            opacity: 1;
-            transform: rotate(0deg) scale(1);
-            transition: opacity 0.4s ease, transform 0.4s ease;
-        }
-        #icon-moon {
             opacity: 0;
             transform: rotate(-90deg) scale(0.5);
             transition: opacity 0.4s ease, transform 0.4s ease;
         }
-        /* Quand le mode sombre est actif */
-        .dark #icon-sun {
-            opacity: 0;
-            transform: rotate(90deg) scale(0.5);
-        }
-        .dark #icon-moon {
+
+        #icon-moon {
             opacity: 1;
             transform: rotate(0deg) scale(1);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* Quand le mode sombre est actif */
+        .dark #icon-sun {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        .dark #icon-moon {
+            opacity: 0;
+            transform: rotate(90deg) scale(0.5);
         }
 
         /* ── Dark Mode Overrides (Global) ────────────────────────────────── */
         .dark .bg-gray-50 {
             background-color: #121212 !important;
         }
+
         .dark .bg-gray-100 {
             background-color: #1a1a1a !important;
         }
+
         .dark .bg-gray-200 {
             background-color: #2a2a2a !important;
         }
+
         .dark .border-gray-100 {
             border-color: rgba(255, 255, 255, 0.05) !important;
         }
+
         .dark .border-gray-200 {
             border-color: rgba(255, 255, 255, 0.1) !important;
         }
+
         .dark .border-gray-300 {
             border-color: rgba(255, 255, 255, 0.2) !important;
         }
+
         .dark .text-gray-700,
         .dark .text-gray-600,
         .dark .text-gray-500 {
             color: #E5E7EB !important;
         }
+
         .dark .text-gray-400 {
             color: #9CA3AF !important;
         }
@@ -237,20 +257,23 @@
             color: #F8F9FA !important;
             border-color: rgba(255, 255, 255, 0.1) !important;
         }
+
         .dark input::placeholder,
         .dark textarea::placeholder {
             color: #6B7280 !important;
         }
+
         .dark input:focus,
         .dark textarea:focus {
             border-color: var(--brand-green) !important;
             box-shadow: 0 0 0 2px rgba(140, 198, 63, 0.1) !important;
         }
-        
+
         /* Specific Search Bar for Dark Mode */
         .dark .search-input {
             background-color: rgba(255, 255, 255, 0.08) !important;
         }
+
         .dark .search-input:focus {
             background-color: rgba(255, 255, 255, 0.12) !important;
         }
@@ -260,27 +283,34 @@
             background-color: #F8FAF4;
             border-color: #E8F3DB;
         }
+
         .dark .features-section {
             background-color: #181818;
-            border-color: rgba(255,255,255,0.08);
+            border-color: rgba(255, 255, 255, 0.08);
         }
+
         .features-section .feat-title {
             color: #111827;
         }
+
         .dark .features-section .feat-title {
             color: #F3F4F6;
         }
+
         .features-section .feat-text {
             color: #6B7280;
         }
+
         .dark .features-section .feat-text {
             color: #9CA3AF;
         }
+
         .features-section .feat-icon-wrap {
             background-color: #E3F2D2;
         }
+
         .dark .features-section .feat-icon-wrap {
-            background-color: rgba(140,198,63,0.12);
+            background-color: rgba(140, 198, 63, 0.12);
         }
     </style>
 </head>
@@ -300,7 +330,8 @@
                     class="w-4 h-6 bg-brand-green mr-1.5 md:mr-2 rounded-sm inline-block group-hover:rotate-12 transition-transform">
                 </div>
                 <span class="text-xl md:text-2xl font-black tracking-tight" style="color: var(--text-main);">
-                    AUDSTORE<span class="text-gray-800 dark:text-gray-300 text-[10px] md:text-sm font-bold align-bottom ml-0.5">sarl</span>
+                    AUDSTORE<span
+                        class="text-gray-800 dark:text-gray-300 text-[10px] md:text-sm font-bold align-bottom ml-0.5">sarl</span>
                 </span>
             </a>
 
@@ -313,9 +344,11 @@
 
         <!-- Barre de recherche Centrale et Liens Rapides -->
         <div class="flex-grow max-w-2xl hidden md:flex items-center justify-center gap-6 px-4">
+            {% if user.role != 'livreur' %}
             <a href="{% url 'catalog:catalog' %}"
                 class="text-sm font-bold opacity-80 hover:opacity-100 hover:text-brand-green transition-all uppercase tracking-wide whitespace-nowrap">
                 Catalogue</a>
+            {% endif %}
 
             <form action="{% url 'catalog:catalog' %}" method="get" class="relative w-full max-w-md group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -329,7 +362,8 @@
         <!-- Panier et Compte -->
         <div class="flex items-center gap-1 sm:gap-3 md:gap-4 order-3 flex-nowrap shrink-0">
             <!-- Bouton du Menu Mobile -->
-            <button id="mobile-menu-open" class="md:hidden p-2 flex items-center justify-center text-current hover:text-brand-green transition-colors">
+            <button id="mobile-menu-open"
+                class="md:hidden p-2 flex items-center justify-center text-current hover:text-brand-green transition-colors">
                 <i class="fa-solid fa-bars-staggered text-xl"></i>
             </button>
 
@@ -352,12 +386,16 @@
             </div>
             {% endif %}
 
-            <a href="{% url 'cart:cart_detail' %}" class="relative p-2 flex items-center justify-center text-current hover:text-brand-green transition-colors">
+            {% if user.role != 'livreur' %}
+            <a href="{% url 'cart:cart_detail' %}"
+                class="relative p-2 flex items-center justify-center text-current hover:text-brand-green transition-colors">
                 <i class="fa-solid fa-shopping-cart text-xl"></i>
-                <span class="cart-count absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-brand-green text-[10px] font-bold px-1.5 py-0.5 rounded-full text-black border-2 border-white dark:border-[#1A1A1A]">
+                <span
+                    class="cart-count absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4 bg-brand-green text-[10px] font-bold px-1.5 py-0.5 rounded-full text-black border-2 border-white dark:border-[#1A1A1A]">
                     {{ request.session.cart|length|default:"0" }}
                 </span>
             </a>
+            {% endif %}
 
             {% if user.is_authenticated %}
             <div class="relative group">
@@ -425,12 +463,13 @@
     <!-- Menu Mobile -->
     <div id="mobile-menu-wrapper" class="fixed inset-0 z-[100] hidden md:hidden">
         <!-- Arrière-plan (Cliquer pour fermer) -->
-        <div id="mobile-menu-backdrop" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 transition-opacity duration-500"></div>
+        <div id="mobile-menu-backdrop"
+            class="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 transition-opacity duration-500"></div>
 
         <!-- Tiroir du Menu Mobile (Style flottant) -->
         <div id="mobile-menu-overlay"
             class="absolute top-4 right-4 bottom-4 w-[85%] max-w-[320px] bg-[#121212]/90 backdrop-blur-2xl z-[101] rounded-3xl border border-white/10 shadow-2xl transform translate-x-[120%] transition-transform duration-500 ease-out flex flex-col overflow-hidden">
-            
+
             <!-- En-tête du Menu Mobile -->
             <div class="p-6 flex items-center justify-between border-b border-white/5">
                 <a href="/" class="flex items-center">
@@ -439,7 +478,8 @@
                         AUDSTORE<span class="text-brand-green text-[10px] ml-0.5">sarl</span>
                     </span>
                 </a>
-                <button id="mobile-menu-close" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all">
+                <button id="mobile-menu-close"
+                    class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-all">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
             </div>
@@ -460,94 +500,120 @@
                 <nav class="space-y-1.5">
                     <a href="/"
                         class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors">
                             <i class="fa-solid fa-house"></i>
                         </div>
                         <span class="font-bold tracking-wide">Accueil</span>
                     </a>
+                    {% if user.role != 'livreur' %}
                     <a href="{% url 'catalog:catalog' %}"
                         class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors">
                             <i class="fa-solid fa-mobile-screen"></i>
                         </div>
                         <span class="font-bold tracking-wide">Tous les produits</span>
                     </a>
+                    {% endif %}
 
-                <!-- Navigation Client (Remplace les catégories) -->
-                {% if user.is_authenticated %}
-                <div class="pt-4 pb-1 px-4">
-                    <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Mon activité</span>
-                </div>
-                <nav class="space-y-1.5">
-                    <a href="{% url 'users:order_history' %}"
-                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
-                            <i class="fa-solid fa-receipt"></i>
-                        </div>
-                        <span class="font-bold tracking-wide">Mes commandes</span>
-                    </a>
-                    <a href="{% url 'cart:cart_detail' %}"
-                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
-                            <i class="fa-solid fa-shopping-cart"></i>
-                        </div>
-                        <span class="font-bold tracking-wide">Mon panier</span>
-                    </a>
-                </nav>
-                {% else %}
-                <!-- Afficher les catégories pour les visiteurs -->
-                <div class="pt-4 pb-1 px-4">
-                    <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Catégories</span>
-                </div>
-                <nav class="space-y-1.5">
-                    <a href="{% url 'catalog:catalog' %}?category=smartphones"
-                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
-                            <i class="fa-solid fa-mobile-button"></i>
-                        </div>
-                        <span class="font-bold tracking-wide">Smartphones</span>
-                    </a>
-                    <a href="{% url 'catalog:catalog' %}?category=ecouteurs-audio"
-                        class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
-                        <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
-                            <i class="fa-solid fa-headphones"></i>
-                        </div>
-                        <span class="font-bold tracking-wide">Accessoires & Audio</span>
-                    </a>
-                </nav>
-                {% endif %}
+                    <!-- Navigation Client (Remplace les catégories) -->
+                    {% if user.is_authenticated %}
+                    <div class="pt-4 pb-1 px-4">
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Mon
+                            activité</span>
+                    </div>
+                    <nav class="space-y-1.5">
+                        {% if user.role == 'livreur' %}
+                        <a href="{% url 'delivery:dashboard' %}"
+                            class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                                <i class="fa-solid fa-truck"></i>
+                            </div>
+                            <span class="font-bold tracking-wide">Commandes assignées</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'users:order_history' %}"
+                            class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <span class="font-bold tracking-wide">Mes commandes</span>
+                        </a>
+                        <a href="{% url 'cart:cart_detail' %}"
+                            class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                                <i class="fa-solid fa-shopping-cart"></i>
+                            </div>
+                            <span class="font-bold tracking-wide">Mon panier</span>
+                        </a>
+                        {% endif %}
+                    </nav>
+                    {% else %}
+                    <!-- Afficher les catégories pour les visiteurs -->
+                    <div class="pt-4 pb-1 px-4">
+                        <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Catégories</span>
+                    </div>
+                    <nav class="space-y-1.5">
+                        <a href="{% url 'catalog:catalog' %}?category=smartphones"
+                            class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                                <i class="fa-solid fa-mobile-button"></i>
+                            </div>
+                            <span class="font-bold tracking-wide">Smartphones</span>
+                        </a>
+                        <a href="{% url 'catalog:catalog' %}?category=ecouteurs-audio"
+                            class="flex items-center gap-4 p-4 text-white/70 hover:text-white hover:bg-white/5 rounded-2xl transition-all group">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-brand-green group-hover:text-black transition-colors text-sm">
+                                <i class="fa-solid fa-headphones"></i>
+                            </div>
+                            <span class="font-bold tracking-wide">Accessoires & Audio</span>
+                        </a>
+                    </nav>
+                    {% endif %}
             </div>
 
             <div class="p-6 bg-white/5 border-t border-white/5">
                 <div class="flex flex-col gap-3">
                     {% if user.is_authenticated %}
-                        <div class="space-y-3">
-                            <a href="{% url 'users:profile' %}" class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center text-black font-bold text-xs uppercase">
-                                        {{ user.username|slice:":2" }}
-                                    </div>
-                                    <span class="text-sm font-bold text-white">{{ user.username }}</span>
+                    <div class="space-y-3">
+                        <a href="{% url 'users:profile' %}"
+                            class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-brand-green flex items-center justify-center text-black font-bold text-xs uppercase">
+                                    {{ user.username|slice:":2" }}
                                 </div>
-                                <i class="fa-solid fa-chevron-right text-white/20 text-xs"></i>
-                            </a>
-                            <form method="post" action="{% url 'users:logout' %}" class="w-full">
-                                {% csrf_token %}
-                                <button type="submit" class="w-full flex items-center gap-3 p-3 text-red-500 hover:text-red-400 bg-red-500/5 rounded-xl border border-red-500/10 transition-all text-xs font-bold">
-                                    <i class="fa-solid fa-power-off"></i>
-                                    Déconnexion
-                                </button>
-                            </form>
-                        </div>
+                                <span class="text-sm font-bold text-white">{{ user.username }}</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-white/20 text-xs"></i>
+                        </a>
+                        <form method="post" action="{% url 'users:logout' %}" class="w-full">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="w-full flex items-center gap-3 p-3 text-red-500 hover:text-red-400 bg-red-500/5 rounded-xl border border-red-500/10 transition-all text-xs font-bold">
+                                <i class="fa-solid fa-power-off"></i>
+                                Déconnexion
+                            </button>
+                        </form>
+                    </div>
                     {% else %}
-                        <div class="grid grid-cols-2 gap-3">
-                            <a href="{% url 'users:login' %}" class="flex items-center justify-center py-3 bg-white/5 rounded-xl text-xs font-bold text-white border border-white/10 hover:bg-white/10 transition-all">Connexion</a>
-                            <a href="{% url 'users:register' %}" class="flex items-center justify-center py-3 bg-brand-green rounded-xl text-xs font-bold text-black border border-brand-green hover:shadow-lg hover:shadow-brand-green/20 transition-all">S'inscrire</a>
-                        </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{% url 'users:login' %}"
+                            class="flex items-center justify-center py-3 bg-white/5 rounded-xl text-xs font-bold text-white border border-white/10 hover:bg-white/10 transition-all">Connexion</a>
+                        <a href="{% url 'users:register' %}"
+                            class="flex items-center justify-center py-3 bg-brand-green rounded-xl text-xs font-bold text-black border border-brand-green hover:shadow-lg hover:shadow-brand-green/20 transition-all">S'inscrire</a>
+                    </div>
                     {% endif %}
                 </div>
-                
-                <div class="mt-6 flex items-center justify-between opacity-40 text-[9px] font-black uppercase tracking-widest text-white">
+
+                <div
+                    class="mt-6 flex items-center justify-between opacity-40 text-[9px] font-black uppercase tracking-widest text-white">
                     <span>&copy; AUDSTORE SARL</span>
                     <div class="flex gap-4">
                         <i class="fa-brands fa-facebook-f"></i>
@@ -557,8 +623,6 @@
             </div>
         </div>
     </div>
-
-
 
     <!-- Messages Flash -->
     <div class="container mx-auto mt-4 px-4 max-w-7xl">
@@ -583,16 +647,16 @@
             <div class="flex flex-col md:flex-row items-center gap-8">
                 <div class="md:w-1/3">
                     <h3 class="text-2xl font-black mb-4">AUDSTORE Douala</h3>
-                    <p class="opacity-70 mb-6 text-sm">Notre boutique principale est située de
-                        Akwa, à côté de la Akwa, Direction commerciale MTN Dubai. Venez découvrir nos nouveautés !</p>
+                    <p class="opacity-70 mb-6 text-sm">Notre boutique principale est située à
+                        Akwa, Douala. Direction commerciale MTN Dubaï. Venez découvrir nos nouveautés !</p>
                     <div class="space-y-3 text-sm">
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-map-pin text-brand-green"></i>
-                            <span class="font-bold">Akwa, Direction commerciale MTN Dubai</span>
+                            <span class="font-bold">Akwa, Douala. Direction commerciale MTN Dubaï</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-phone text-brand-green"></i>
-                            <span>+237 600 000 000</span>
+                            <span>+237 653 48 69 00</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <i class="fa-solid fa-clock text-brand-green"></i>
@@ -605,6 +669,27 @@
                     <iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"
                         src="https://www.openstreetmap.org/export/embed.html?bbox=9.699,4.048,9.709,4.054&amp;layer=mapnik&amp;marker=4.051,9.704"
                         style="filter: grayscale(1) contrast(1.2); transition: filter 0.5s;" id="store-map"></iframe>
+
+                    <!-- Indicateur Direction MTN Dubaï -->
+                    <div
+                        class="absolute top-4 left-4 z-10 bg-white/95 dark:bg-black/90 backdrop-blur-sm px-4 py-3 rounded-xl shadow-2xl border border-gray-100 dark:border-white/10 flex items-center gap-3 animate-fade-in pointer-events-none">
+                        <div class="flex flex-col items-center">
+                            <i
+                                class="fa-solid fa-location-arrow text-brand-green text-xl transform -rotate-45 mb-1 animate-pulse"></i>
+                            <div class="w-1.5 h-1.5 rounded-full bg-brand-green"></div>
+                        </div>
+                        <div class="flex flex-col">
+                            <span
+                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Point
+                                de repère</span>
+                            <span class="text-xs font-black text-gray-900 dark:text-white uppercase">MTN Dubaï -
+                                AKWA</span>
+                        </div>
+                    </div>
+
+                    <!-- Overlay de protection -->
+                    <div class="absolute inset-0 z-0 pointer-events-none bg-gradient-to-t from-black/20 to-transparent">
+                    </div>
                 </div>
             </div>
         </div>
@@ -655,14 +740,14 @@
                 <ul class="space-y-4 text-sm text-gray-400">
                     <li class="flex items-start">
                         <i class="fa-solid fa-location-dot mt-1 mr-3 text-brand-green"></i>
-                        <span><strong>Douala:</strong> Akwa, Direction commerciale MTN Dubai</span>
+                        <span><strong>Douala:</strong> Akwa, Douala. Direction commerciale MTN Dubaï</span>
                     </li>
                     <li class="flex items-start">
                         <i class="fa-solid fa-location-dot mt-1 mr-3 text-brand-green"></i>
                         <span><strong>Yaoundé:</strong> Rue Kennedy, ancien direction Orange</span>
                     </li>
                     <li class="flex items-center mt-4 text-white font-medium">
-                        <i class="fa-solid fa-phone mr-3 text-brand-green"></i> +237 600 000 000
+                        <i class="fa-solid fa-phone mr-3 text-brand-green"></i> +237 653 48 69 00
                     </li>
                 </ul>
             </div>
@@ -686,12 +771,61 @@
             <div class="space-x-4 mt-4 md:mt-0">
                 <a href="#" class="hover:text-white">Conditions d'utilisation</a>
                 <a href="#" class="hover:text-white">Politique de confidentialité</a>
-                <a href="#" class="hover:text-white">Politique de retour</a>
+                <a href="{% url 'catalog:garantie' %}" class="hover:text-white">Politique de retour</a>
             </div>
         </div>
     </footer>
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/main.js' %}?v=2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const handleConfirm = function(e) {
+            e.preventDefault();
+            const element = this;
+            const message = element.getAttribute('data-confirm');
+            const isDark = document.body.classList.contains('dark');
+            
+            Swal.fire({
+                title: 'Confirmation',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#8CC63F',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Oui, confirmer',
+                cancelButtonText: 'Annuler',
+                background: isDark ? '#1E1E1E' : '#ffffff',
+                color: isDark ? '#f8f9fa' : '#1a1a1a',
+                customClass: {
+                    title: 'text-lg font-bold font-sans ' + (isDark ? 'text-white' : 'text-gray-900'),
+                    htmlContainer: 'text-sm ' + (isDark ? 'text-gray-400' : 'text-gray-600'),
+                    popup: 'rounded-2xl shadow-xl border ' + (isDark ? 'border-gray-800' : 'border-gray-100'),
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    element.removeAttribute('data-confirm');
+                    if (element.tagName === 'A') {
+                        window.location.href = element.href;
+                    } else if (element.tagName === 'FORM') {
+                        element.submit();
+                    } else if (element.tagName === 'BUTTON') {
+                        const form = element.closest('form');
+                        if (form) form.submit();
+                    }
+                }
+            });
+        };
+
+        document.querySelectorAll('a[data-confirm], button[data-confirm]').forEach(el => {
+            el.addEventListener('click', handleConfirm);
+        });
+        
+        document.querySelectorAll('form[data-confirm]').forEach(form => {
+            form.addEventListener('submit', handleConfirm);
+        });
+    });
+    </script>
 </body>
 
 </html>

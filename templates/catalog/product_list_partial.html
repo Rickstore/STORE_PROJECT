@@ -1,0 +1,83 @@
+{% load static %}
+
+{% if active_category %}
+<div class="mb-8 relative rounded-2xl overflow-hidden bg-gray-900 h-48 md:h-64 shadow-xl group">
+    {% if active_category.img_cat %}
+    <img src="{{ active_category.img_cat.url }}" alt="{{ active_category.nom_cat }}" class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700">
+    {% else %}
+    <div class="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900 opacity-60"></div>
+    {% endif %}
+    
+    <div class="absolute inset-0 flex flex-col justify-center px-8 md:px-12 pointer-events-none">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="w-8 h-1 bg-brand-green rounded-full"></span>
+            <span class="text-brand-green text-xs font-black uppercase tracking-[0.2em]">Explorez la collection</span>
+        </div>
+        <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">{{ active_category.nom_cat }}</h1>
+        {% if active_category.desc_cat %}
+        <p class="text-gray-300 text-sm md:text-base max-w-xl leading-relaxed">{{ active_category.desc_cat }}</p>
+        {% endif %}
+    </div>
+    <div class="absolute bottom-0 right-0 p-8 opacity-10">
+        <i class="fa-solid {{ active_category.icon }} text-8xl text-white"></i>
+    </div>
+</div>
+{% endif %}
+
+<div class="mb-6 flex flex-col sm:flex-row justify-between items-end gap-4">
+    <div class="{% if active_category %}hidden sm:block{% endif %}">
+        {% if not active_category %}
+        <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Catalogue</h1>
+        {% endif %}
+        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Découvrez nos <span class="text-gray-900 dark:text-brand-green font-bold">{{ paginator.count }}</span> pépites technologiques</p>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="w-full sm:w-auto">
+        <form action="{% url 'catalog:catalog' %}" method="get" class="relative group" id="catalogSearchForm">
+            {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+            {% if current_state %}<input type="hidden" name="state" value="{{ current_state }}">{% endif %}
+            
+            <input type="text" name="q" value="{{ search_query|default:'' }}" 
+                placeholder="Rechercher dans {{ active_category.nom_cat|default:'le catalogue' }}..." 
+                class="w-full sm:w-64 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green transition-all placeholder:text-gray-400">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-brand-green transition-colors">
+                <i class="fa-solid fa-search text-xs"></i>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+    {% for product in products %}
+        {% include 'components/product_card.html' with product=product %}
+    {% empty %}
+        <div class="col-span-full py-12 text-center bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-100 dark:border-white/5">
+            <p class="text-gray-500">Aucun produit ne correspond à votre recherche.</p>
+            <a href="{% url 'catalog:catalog' %}" class="text-brand-green mt-2 inline-block hover:underline">Voir tout le catalogue</a>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-12 flex justify-center">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="ajax-page-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
+                Précédent
+            </a>
+        {% endif %}
+        
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-brand-green text-sm font-bold text-black transform scale-[1.02] shadow-sm z-10">
+            Page {{ page_obj.number }} sur {{ paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_state %}&state={{ current_state }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="ajax-page-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-white/10 bg-white dark:bg-white/5 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors">
+                Suivant
+            </a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}

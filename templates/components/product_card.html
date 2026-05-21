@@ -1,11 +1,11 @@
 <div
     class="bg-white dark:bg-[#1E1E1E] rounded-xl shadow-sm border border-gray-100 dark:border-white/5 overflow-hidden hover:shadow-md transition-all duration-300 flex flex-col h-full group">
     <div class="relative h-56 sm:h-64 shrink-0">
-        <a href="{% url 'catalog:product_detail' product.slug %}"
+        <a href="{% url 'catalog:product_detail' product.id %}"
             class="block w-full h-full bg-white dark:bg-[#2a2a2a] overflow-hidden">
-            {% if product.image %}
+            {% if product.img_path %}
             <div class="w-full h-full flex items-center justify-center p-3 sm:p-4">
-                <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                <img src="{{ product.img_path.url }}" alt="{{ product.nom_prod }}"
                     class="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105">
             </div>
             {% else %}
@@ -22,22 +22,18 @@
     </div>
 
     <div class="p-2 sm:p-3 flex flex-col flex-grow relative bg-white dark:bg-transparent z-10">
-        <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">{{ product.brand }}</p>
+        <p class="text-[9px] text-[#22C55E] uppercase tracking-widest font-black mb-0.5">{{ product.marque|default:"AUDIOSTORE" }}</p>
 
-        <a href="{% url 'catalog:product_detail' product.slug %}" class="block mb-2 h-7 sm:h-8 overflow-hidden">
+        <a href="{% url 'catalog:product_detail' product.id %}" class="block mb-2 h-7 sm:h-8 overflow-hidden">
             <h3
                 class="text-[11px] sm:text-xs font-bold text-gray-800 dark:text-gray-100 line-clamp-2 leading-tight group-hover:text-brand-green transition-colors duration-300">
-                {{ product.name }} {% if product.capacity %}{{ product.capacity }} Go{% endif %}</h3>
+                {{ product.nom_prod }} {% if product.capacite %}{{ product.get_capacite_display }}{% endif %}</h3>
         </a>
 
         <div class="mt-auto pt-2 flex flex-col gap-2">
             <div>
                 <span class="text-xs sm:text-sm font-black text-gray-900 dark:text-white leading-none">
-                    {% if product.variants.exists %}
-                    {{ product.variants.first.price|floatformat:0 }}
-                    {% else %}
-                    {{ product.price|floatformat:0 }}
-                    {% endif %}
+                    {{ product.prix_unit|floatformat:0 }}
                     <span class="text-[8px] sm:text-[9px] font-medium text-gray-400 ml-0.5">FCFA</span>
                 </span>
             </div>
@@ -46,8 +42,8 @@
             <button
                 type="button"
                 class="ajax-add-to-cart w-full bg-[#22C55E] hover:bg-[#16A34A] text-white py-1.5 sm:py-2 rounded-lg transition-all flex items-center justify-center shadow-sm active:scale-95"
-                data-url="{% url 'cart:cart_add_ajax' product.id %}"
-                data-name="{{ product.name|truncatechars:30 }}">
+                data-url="{% url 'cart:cart_add' product.id %}"
+                data-name="{{ product.nom_prod|truncatechars:30 }}">
                 <i class="fa-solid fa-cart-shopping text-[10px] sm:text-xs mr-1 sm:mr-2"></i>
                 <span class="text-[9px] sm:text-[10px] font-bold">Ajouter</span>
             </button>

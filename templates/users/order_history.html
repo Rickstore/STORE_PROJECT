@@ -19,24 +19,18 @@
                 <div class="flex items-center gap-4">
                     <div>
                         <p class="font-bold text-gray-900 text-sm font-mono">{{ order.order_number }}</p>
-                        <p class="text-xs text-gray-400">{{ order.created_at|date:"d/m/Y" }}</p>
+                        <p class="text-xs text-gray-400">{{ order.date_com|date:"d/m/Y" }}</p>
                     </div>
                     <span class="px-2 py-1 rounded-full text-xs font-semibold
-                        {% if order.status == 'delivered' %}bg-green-50 text-green-700
-                        {% elif order.status == 'failed' %}bg-red-50 text-red-700
-                        {% elif order.status == 'delivering' %}bg-blue-50 text-blue-700
+                        {% if order.statut == 'livre' %}bg-green-50 text-green-700
+                        {% elif order.statut == 'annule' %}bg-red-50 text-red-700
+                        {% elif order.statut == 'expedie' %}bg-blue-50 text-blue-700
                         {% else %}bg-yellow-50 text-yellow-700{% endif %}">
-                        {{ order.get_status_display }}
-                    </span>
-                    <span class="px-2 py-1 rounded-full text-xs font-semibold
-                        {% if order.payment_status == 'paid' %}bg-green-50 text-green-700
-                        {% elif order.payment_status == 'failed' %}bg-red-50 text-red-700
-                        {% else %}bg-gray-100 text-gray-600{% endif %}">
-                        {{ order.get_payment_status_display }}
+                        {{ order.get_statut_display }}
                     </span>
                 </div>
                 <div class="text-right flex items-center gap-4">
-                    <span class="font-black text-gray-900">{{ order.total|floatformat:0 }} FCFA</span>
+                    <span class="font-black text-gray-900">{{ order.mt_total|floatformat:0 }} FCFA</span>
                     <div class="flex gap-2">
                         <a href="{% url 'users:order_track' order.order_number %}" class="text-xs font-bold text-[#8CC63F] border border-[#8CC63F]/30 rounded-lg px-3 py-1.5 hover:bg-[#8CC63F]/10 transition-colors">
                             Suivre
@@ -51,10 +45,10 @@
             <!-- Items preview -->
             <div class="px-5 py-3 flex items-center gap-3">
                 {% for item in order.items.all|slice:":3" %}
-                {% if item.product.image %}
-                <img src="{{ item.product.image.url }}" class="w-10 h-10 rounded-lg object-cover border border-gray-100" title="{{ item.product.name }}">
+                {% if item.product.img_path %}
+                <img src="{{ item.product.img_path.url }}" class="w-10 h-10 rounded-lg object-cover border border-gray-100" title="{{ item.product.nom_prod }}">
                 {% else %}
-                <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center" title="{{ item.product.name }}">
+                <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center" title="{{ item.product.nom_prod }}">
                     <i class="fa-solid fa-mobile text-gray-300 text-sm"></i>
                 </div>
                 {% endif %}
@@ -62,7 +56,7 @@
                 {% if order.items.count > 3 %}
                 <span class="text-xs text-gray-400 font-medium">+{{ order.items.count|add:"-3" }} autre(s)</span>
                 {% endif %}
-                <span class="text-xs text-gray-500 ml-auto">{{ order.items.count }} article(s) · {{ order.get_delivery_type_display }}</span>
+                <span class="text-xs text-gray-500 ml-auto">{{ order.items.count }} article(s) · {{ order.get_pay_mode_display }}</span>
             </div>
         </div>
         {% endfor %}

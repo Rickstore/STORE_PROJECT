@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Garantie & Retour | AUDSTOREsarl{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12">
+
+    <!-- Header -->
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-[#F0F7E6] mb-6">
+            <i class="fa-solid fa-shield-halved text-[#8CC63F] text-3xl"></i>
+        </div>
+        <h1 class="text-3xl font-black text-gray-900 mb-3">Politique de Garantie</h1>
+        <p class="text-gray-500 font-medium">AUDSTORE SARL — Douala &amp; Yaoundé</p>
+    </div>
+
+    <!-- Card 1: Garantie 30 jours -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 mb-5 flex gap-5 items-start hover:shadow-md transition-shadow">
+        <div class="w-14 h-14 rounded-xl bg-[#F0F7E6] flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-calendar-check text-[#8CC63F] text-2xl"></i>
+        </div>
+        <div>
+            <h2 class="font-black text-gray-900 text-lg mb-2">Garantie 30 Jours</h2>
+            <p class="text-gray-600 text-sm leading-relaxed">
+                Tous nos produits sont couverts par une <strong>garantie de 30 jours</strong> à compter de la date d'achat.
+                En cas de panne ou de défaut de fabrication constaté dans ce délai, AUDSTORE s'engage à réparer ou remplacer le produit sans frais supplémentaires.
+            </p>
+            <div class="mt-3 flex items-center gap-2 text-sm text-[#8CC63F] font-bold">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Valable sur présentation de votre facture d'achat</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 2: Ce qui n'est PAS couvert -->
+    <div class="bg-white rounded-2xl border border-red-100 shadow-sm p-7 mb-5 flex gap-5 items-start hover:shadow-md transition-shadow">
+        <div class="w-14 h-14 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl"></i>
+        </div>
+        <div>
+            <h2 class="font-black text-gray-900 text-lg mb-2">Ce que la Garantie ne couvre <span class="text-red-500">PAS</span></h2>
+            <ul class="text-gray-600 text-sm leading-relaxed space-y-2">
+                <li class="flex items-start gap-2">
+                    <i class="fa-solid fa-xmark text-red-400 mt-0.5 shrink-0"></i>
+                    <span><strong>L'afficheur (écran)</strong> — les dommages à l'écran causés par une chute, un choc ou une pression excessive sont exclus de la garantie.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <i class="fa-solid fa-xmark text-red-400 mt-0.5 shrink-0"></i>
+                    <span><strong>Les accessoires</strong> — chargeurs, câbles, écouteurs et coques ne sont pas couverts par la garantie appareil.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <i class="fa-solid fa-xmark text-red-400 mt-0.5 shrink-0"></i>
+                    <span><strong>Les dégâts des eaux</strong> et les dommages liés à une mauvaise utilisation.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <i class="fa-solid fa-xmark text-red-400 mt-0.5 shrink-0"></i>
+                    <span><strong>Les produits modifiés</strong> ou réparés en dehors de nos boutiques.</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Card 3: Rapprochez-vous de la boutique -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 mb-5 flex gap-5 items-start hover:shadow-md transition-shadow">
+        <div class="w-14 h-14 rounded-xl bg-[#F0F7E6] flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-store text-[#8CC63F] text-2xl"></i>
+        </div>
+        <div class="flex-grow">
+            <h2 class="font-black text-gray-900 text-lg mb-2">Rapprochez-vous de la boutique la plus proche</h2>
+            <p class="text-gray-600 text-sm leading-relaxed mb-4">
+                Pour toute réclamation ou mise en jeu de votre garantie, présentez-vous directement dans l'une de nos boutiques avec votre facture d'achat.
+                Nos techniciens prendront en charge votre appareil dans les meilleurs délais.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Douala -->
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <p class="font-black text-gray-900 text-sm mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-[#8CC63F]"></i> Douala
+                    </p>
+                    <p class="text-xs text-gray-500 leading-relaxed">Akwa, Douala<br>Derrière MTN Commerciale</p>
+                    <a href="tel:+237653486900" class="mt-3 flex items-center gap-2 text-xs font-bold text-[#8CC63F] hover:underline">
+                        <i class="fa-solid fa-phone"></i> +237 6 53 48 69 00
+                    </a>
+                </div>
+                <!-- Yaoundé -->
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <p class="font-black text-gray-900 text-sm mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-[#8CC63F]"></i> Yaoundé
+                    </p>
+                    <p class="text-xs text-gray-500 leading-relaxed">Rue Kennedy<br>Ancien direction Orange</p>
+                    <a href="tel:+237653486900" class="mt-3 flex items-center gap-2 text-xs font-bold text-[#8CC63F] hover:underline">
+                        <i class="fa-solid fa-phone"></i> +237 6 53 48 69 00
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hours -->
+    <div class="bg-[#1a1a1a] rounded-2xl p-6 text-center">
+        <i class="fa-solid fa-clock text-[#8CC63F] text-2xl mb-3 block"></i>
+        <p class="text-white font-bold mb-1">Heures d'ouverture</p>
+        <p class="text-gray-400 text-sm">Lundi – Samedi : <strong class="text-white">8h30 – 19h00</strong></p>
+        <p class="text-gray-500 text-xs mt-2">Dimanche et jours fériés : fermé</p>
+    </div>
+
+    <!-- Back button -->
+    <div class="text-center mt-8">
+        <a href="{% url 'catalog:home' %}" class="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-gray-800 transition-colors">
+            <i class="fa-solid fa-arrow-left"></i> Retour à l'accueil
+        </a>
+    </div>
+
+</div>
+{% endblock %}

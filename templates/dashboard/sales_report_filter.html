@@ -1,0 +1,97 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Rapport de Ventes | AUDSTOREsarl{% endblock %}
+{% block page_title %}Rapport de Ventes PDF{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+    <!-- Card -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-[#8CC63F]/10 flex items-center justify-center">
+                <i class="fa-solid fa-file-pdf text-[#8CC63F] text-lg"></i>
+            </div>
+            <div>
+                <h2 class="font-bold text-gray-900 text-base">Générer un rapport de ventes</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Choisissez une période entre 2 semaines et 6 mois</p>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="post" action="{% url 'dashboard:sales_report' %}" class="px-6 py-6 space-y-5">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-2 gap-5">
+                <!-- Date début -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        <i class="fa-regular fa-calendar-days mr-1 text-[#8CC63F]"></i>Date de début
+                    </label>
+                    <input
+                        type="date"
+                        name="date_from"
+                        id="date_from"
+                        value="{{ default_from }}"
+                        min="{{ min_date }}"
+                        max="{{ today }}"
+                        required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8CC63F]/30 focus:border-[#8CC63F] transition-all"
+                    >
+                </div>
+
+                <!-- Date fin -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wide">
+                        <i class="fa-regular fa-calendar-check mr-1 text-[#8CC63F]"></i>Date de fin
+                    </label>
+                    <input
+                        type="date"
+                        name="date_to"
+                        id="date_to"
+                        value="{{ default_to }}"
+                        min="{{ min_date }}"
+                        max="{{ today }}"
+                        required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#8CC63F]/30 focus:border-[#8CC63F] transition-all"
+                    >
+                </div>
+            </div>
+
+            <!-- Règles -->
+            <div class="bg-[#8CC63F]/5 border border-[#8CC63F]/20 rounded-xl px-4 py-3 text-xs text-gray-600 space-y-1">
+                <p><i class="fa-solid fa-circle-info text-[#8CC63F] mr-1.5"></i><strong>Règles :</strong> Période minimum <strong>2 semaines (14 jours)</strong>, maximum <strong>6 mois</strong>.</p>
+                <p><i class="fa-solid fa-chart-bar text-[#8CC63F] mr-1.5"></i>Le rapport inclura les commandes <strong>validées et livrées</strong> de la période.</p>
+            </div>
+
+            <!-- Submit -->
+            <button
+                type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-[#8CC63F] hover:bg-[#7ab534] text-white font-bold py-3 px-6 rounded-xl transition-colors shadow-sm shadow-[#8CC63F]/30 text-sm"
+            >
+                <i class="fa-solid fa-download"></i>
+                Télécharger le rapport PDF
+            </button>
+        </form>
+    </div>
+
+    <!-- Tip -->
+    <p class="text-center text-xs text-gray-400 mt-4">
+        <i class="fa-solid fa-lock text-gray-300 mr-1"></i>
+        Réservé aux administrateurs — Le fichier PDF sera téléchargé directement.
+    </p>
+</div>
+
+<script>
+    // Auto-validate: date_to must be >= date_from
+    document.getElementById('date_from').addEventListener('change', function () {
+        const to = document.getElementById('date_to');
+        if (to.value && to.value < this.value) {
+            to.value = this.value;
+        }
+        to.min = this.value;
+    });
+</script>
+{% endblock %}

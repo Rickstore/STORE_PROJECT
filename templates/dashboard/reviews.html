@@ -44,8 +44,8 @@
                             <div class="text-[10px] text-gray-400">{{ review.user.email }}</div>
                         </td>
                         <td class="px-6 py-4 text-gray-600 font-medium">
-                            <a href="{% url 'catalog:product_detail' review.product.slug %}" target="_blank" class="hover:text-green">
-                                {{ review.product.name }}
+                            <a href="{% url 'catalog:product_detail' review.product.id %}" target="_blank" class="hover:text-green">
+                                {{ review.product.nom_prod }}
                             </a>
                         </td>
                         <td class="px-6 py-4">
@@ -82,7 +82,7 @@
                                     </button>
                                 </form>
                                 {% endif %}
-                                <form method="post" action="{% url 'dashboard:review_action' review.pk 'delete' %}" onsubmit="return confirm('Supprimer cet avis ?');">
+                                <form method="post" action="{% url 'dashboard:review_action' review.pk 'delete' %}" data-confirm="Supprimer cet avis ?">
                                     {% csrf_token %}
                                     <button type="submit" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Supprimer">
                                         <i class="fa-solid fa-trash"></i>

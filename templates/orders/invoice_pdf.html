@@ -6,180 +6,329 @@
     <style>
         @page {
             size: a4 portrait;
-            margin: 1.5cm;
+            margin: 0.8cm 1cm;
         }
+        * { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
-            color: #333;
-            line-height: 1.4;
-        }
-        .header {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        .logo-text {
-            font-size: 28pt;
-            font-weight: bold;
-            color: #8CC63F; /* Brand Green */
-            letter-spacing: -1px;
-        }
-        .logo-sub {
-            font-size: 10pt;
-            color: #333;
-            font-weight: bold;
-        }
-        .company-info {
-            font-size: 9pt;
-            color: #555;
-        }
-        .invoice-title-box {
-            background-color: #8CC63F;
-            color: white;
-            padding: 5px 15px;
-            font-size: 18pt;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 10px;
-        }
-        .invoice-number {
-            font-size: 14pt;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 9.5pt;
             color: #000;
-            margin-top: 5px;
+            line-height: 1.3;
         }
-        .details-table {
+
+        /* ── TOP BANNER ─────────────────────────────────────────────── */
+        .banner-wrap {
             width: 100%;
-            margin-top: 30px;
+            margin-bottom: 12px;
+        }
+        .banner-table {
+            width: 100%;
             border-collapse: collapse;
         }
-        .details-table th {
-            background-color: #333;
-            color: white;
-            padding: 8px;
-            text-align: left;
-            font-size: 10pt;
-            text-transform: uppercase;
-        }
-        .details-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        .client-info {
-            margin-top: 20px;
-            border-top: 2px solid #333;
-            padding-top: 10px;
-        }
-        .total-box {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 16pt;
+        /* Left dark section */
+        .banner-left {
+            background-color: #1a1a1a;
+            color: #8CC63F;
+            font-size: 9pt;
             font-weight: bold;
+            padding: 8px 12px;
+            width: 55%;
+            vertical-align: middle;
         }
-        .net-a-payer {
-            background-color: #f0f0f0;
-            padding: 10px;
-            border: 2px solid #333;
+        .banner-left .store-name {
+            font-size: 20pt;
+            font-weight: 900;
+            color: #8CC63F;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: block;
+        }
+        .banner-left .tagline {
+            font-size: 8.5pt;
+            color: #aaa;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Right green vertical stripe: "VENTE DES TELEPHONES & ACCESSOIRES" */
+        .banner-right {
+            background-color: #8CC63F;
+            color: #fff;
+            font-size: 8.5pt;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            width: 45%;
+            vertical-align: middle;
+            padding: 6px 4px;
+        }
+        .banner-right .vert-text {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            white-space: nowrap;
             display: inline-block;
         }
-        .footer-info {
-            margin-top: 50px;
-            font-size: 9pt;
-            color: #777;
-        }
-        .signatures {
-            margin-top: 80px;
+
+        /* ── INFO ROW ────────────────────────────────────────────────── */
+        .info-table {
             width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
         }
-        .signature-col {
-            width: 50%;
-            text-align: center;
+        .company-col {
+            font-size: 8.5pt;
+            line-height: 1.5;
+            width: 58%;
+            vertical-align: top;
+            padding-right: 10px;
+        }
+        .company-col strong {
+            font-size: 10pt;
+        }
+        .invoice-col {
+            width: 42%;
+            text-align: right;
+            vertical-align: top;
+        }
+        .invoice-label {
+            font-size: 22pt;
+            font-weight: 900;
+            color: #8CC63F;
+            display: block;
+        }
+        .invoice-no {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #cc0000;
+            display: block;
         }
         .guarantee {
-            color: #8CC63F;
+            font-size: 10.5pt;
             font-weight: bold;
+            color: #8CC63F;
+            display: block;
+            margin-top: 3px;
+        }
+        .invoice-date {
+            font-size: 9pt;
+            font-weight: bold;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* ── CLIENT BLOCK ────────────────────────────────────────────── */
+        .client-box {
+            border-top: 1.5px solid #000;
+            border-bottom: 1.5px solid #000;
+            padding: 7px 4px;
+            margin-bottom: 14px;
+            font-size: 9pt;
+        }
+        .client-line {
+            margin-bottom: 3px;
+        }
+        .dotted {
+            border-bottom: 1px dotted #888;
+            display: inline-block;
+            width: 75%;
+        }
+
+        /* ── ITEMS TABLE ─────────────────────────────────────────────── */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        .items-table th {
+            background-color: #2c2c2c;
+            color: #fff;
+            padding: 7px 6px;
+            font-size: 8.5pt;
+            font-weight: 900;
+            text-align: center;
+            border: 1px solid #000;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .items-table td {
+            padding: 8px 6px;
+            border: 1px solid #aaa;
+            text-align: center;
+            font-size: 9pt;
+            min-height: 22px;
+        }
+        .items-table .td-left {
+            text-align: left;
+        }
+
+        /* ── TOTAL SECTION ───────────────────────────────────────────── */
+        .total-wrap {
+            width: 100%;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .net-payer {
+            float: right;
             font-size: 12pt;
-            margin-top: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 2px solid #000;
+            padding: 6px 14px;
+        }
+        .net-payer span {
+            color: #8CC63F;
+        }
+        .amount-written {
+            padding-top: 28px;
+            font-style: italic;
+            font-size: 8.5pt;
+            clear: both;
+        }
+
+        /* ── LEGAL NOTICE ────────────────────────────────────────────── */
+        .legal-box {
+            margin-top: 14px;
+            font-size: 8.5pt;
+            font-weight: bold;
+            border-top: 1px dashed #555;
+            padding-top: 8px;
+        }
+        .legal-box .nb-label {
+            text-decoration: underline;
+        }
+
+        /* ── SIGNATURES ──────────────────────────────────────────────── */
+        .sig-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+        .sig-cell {
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+            font-size: 8.5pt;
+        }
+        .sig-line {
+            margin-top: 55px;
+            font-size: 8.5pt;
         }
     </style>
 </head>
 <body>
-    <table class="header">
+
+    <!-- ── TOP BANNER ── -->
+    <table class="banner-table">
         <tr>
-            <td style="width: 60%;">
-                <div class="logo-text">AUDSTORE<span class="logo-sub">sarl</span></div>
-                <div class="company-info">
-                    Apple et Commerce Général<br>
-                    NRC CM-RC/DLA/2022/B/5250<br>
-                    NIU: M092217625998T<br>
-                    Douala Akwa, Derrière MTN Commerciale<br>
-                    Tél: (237) 6 53 48 69 00
-                </div>
+            <td class="banner-left">
+                <span class="store-name">AUDSTORE</span>
+                <span class="tagline">Vente des produits Apple et Commerce Général</span>
             </td>
-            <td style="width: 40%; text-align: right; vertical-align: top;">
-                <div class="invoice-title-box">FACTURE</div>
-                <div class="invoice-number">N° {{ order.order_number }}</div>
-                <div class="guarantee">Garantie 1 Mois</div>
-                <div style="margin-top: 10px;">Douala le, {{ order.created_at|date:"d/m/Y" }}</div>
+            <td class="banner-right" style="height: 60px;">
+                <span class="vert-text">VENTE DES TÉLÉPHONES &amp; ACCESSOIRES</span>
             </td>
         </tr>
     </table>
 
-    <div class="client-info">
-        <strong>Mr, Mme, M :</strong> {{ order.user.get_full_name|default:order.user.username }}<br>
-        <strong>Tél :</strong> {{ order.address.phone|default:order.user.phone|default:"N/A" }}
+    <!-- ── COMPANY INFO + INVOICE META ── -->
+    <table class="info-table">
+        <tr>
+            <td class="company-col">
+                <strong>AUDSTORE</strong><br>
+                Vente des produits Apple et Commerce Général<br>
+                N°RCCM: RC/DLA/2022/B/5250<br>
+                NIU: M092217625998T<br>
+                &#9990; (237) 6 53 48 69 00<br>
+                Douala Akwa, Derrière MTN Commerciale
+            </td>
+            <td class="invoice-col">
+                <span class="invoice-label">FACTURE</span>
+                <span class="invoice-no">N° {{ order.order_number }}</span>
+                <span class="guarantee">Garantie 1 Mois</span>
+                <span class="invoice-date">Douala le, {{ order.date_com|date:"d/m/Y" }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ── CLIENT INFORMATION ── -->
+    <div class="client-box">
+        <div class="client-line">
+            <strong>Mr, Mme, M :</strong>
+            <span class="dotted">&nbsp;{% with name=order.client_id.get_full_name %}{% if name %}{{ name }}{% elif order.client_id.email %}{{ order.client_id.email }}{% else %}{{ order.client_id.username }}{% endif %}{% endwith %}</span>
+        </div>
+        <div class="client-line">
+            <strong>Tél :</strong>
+            <span class="dotted">&nbsp;{% if order.client_id.phone %}{{ order.client_id.phone }}{% endif %}</span>
+        </div>
     </div>
 
-    <table class="details-table">
+
+    <!-- ── PRODUCTS TABLE ── -->
+    <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 10%;">QTÉS</th>
-                <th style="width: 50%;">DÉSIGNATIONS</th>
-                <th style="width: 20%;">P.U (FCFA)</th>
-                <th style="width: 20%;">MONTANTS (FCFA)</th>
+                <th style="width: 8%;">QTÉS</th>
+                <th style="width: 52%;">DÉSIGNATIONS</th>
+                <th style="width: 20%;">P.U</th>
+                <th style="width: 20%;">MONTANTS</th>
             </tr>
         </thead>
         <tbody>
             {% for item in items %}
             <tr>
                 <td>{{ item.quantity }}</td>
-                <td>{{ item.product.name }}</td>
-                <td>{{ item.price }}</td>
-                <td>{{ item.get_cost }}</td>
+                <td class="td-left">
+                    {{ item.product.nom_prod }}
+                    {% if item.color or item.capacity %}
+                    <br><small style="color:#555;">({{ item.color|default:"" }}{% if item.color and item.capacity %} / {% endif %}{{ item.capacity|default:"" }})</small>
+                    {% endif %}
+                </td>
+                <td>{{ item.price|floatformat:0 }} F</td>
+                <td>{{ item.get_cost|floatformat:0 }} F</td>
             </tr>
             {% endfor %}
-            {% if order.delivery_fee > 0 %}
+            <!-- Padding rows to fill space -->
+            {% for i in "123456"|make_list %}
             <tr>
-                <td>1</td>
-                <td>Frais de livraison</td>
-                <td>{{ order.delivery_fee }}</td>
-                <td>{{ order.delivery_fee }}</td>
+                <td style="height: 22px;">&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
-            {% endif %}
+            {% endfor %}
         </tbody>
     </table>
 
-    <div class="total-box">
-        <div class="net-a-payer">
-            NET À PAYER : {{ order.total }} FCFA
-        </div>
+    <!-- ── TOTAL ── -->
+    <div class="total-wrap">
+        <div class="net-payer">NET À PAYER : <span>{{ order.mt_total|floatformat:0 }} FCFA</span></div>
+    </div>
+    <div class="amount-written">
+        Arrêté de la présente facture à la somme de: ....................................................................................
     </div>
 
-    <div class="footer-info">
-        <strong>NB:</strong> La garantie ne couvre pas l'afficheur et les accessoires.<br>
+    <!-- ── LEGAL NOTICE ── -->
+    <div class="legal-box">
+        <span class="nb-label">NB:</span> La garantie ne couvre pas l'afficheur et les accessoires.<br>
         L'argent versé n'est pas remboursé.
     </div>
 
-    <table class="signatures">
+    <!-- ── SIGNATURES ── -->
+    <table class="sig-table">
         <tr>
-            <td class="signature-col">
+            <td class="sig-cell">
                 <strong>Signature prestataire</strong><br>
-                <div style="height: 60px;"></div>
+                <span style="font-size:9pt; font-weight:bold;">(237) 6 53 48 69 00</span>
+                <div class="sig-line">........................................</div>
             </td>
-            <td class="signature-col">
-                <strong>Signature client</strong><br>
-                <div style="height: 60px;"></div>
+            <td class="sig-cell">
+                <strong>Signature client</strong>
+                <div class="sig-line">........................................</div>
             </td>
         </tr>
     </table>
+
 </body>
 </html>

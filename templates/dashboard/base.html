@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Back-Office | AUDSTOREsarl{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'fontawesome/css/all.min.css' %}">
+
     {% block extra_head %}{% endblock %}
     <style>
         :root { --green: #8CC63F; --dark: #1A1A1A; }
@@ -63,7 +66,7 @@
             </a>
 
             <div class="sidebar-section">Catalogue</div>
-            <a href="{% url 'dashboard:products' %}" class="sidebar-link {% if active_section == 'products' and 'categories' not in request.path and 'attributes' not in request.path %}nav-active{% endif %}">
+            <a href="{% url 'dashboard:products' %}" class="sidebar-link {% if active_section == 'products' and 'categories' not in request.path %}nav-active{% endif %}">
                 <i class="nav-icon fa-solid fa-mobile-screen w-4 text-center text-gray-400"></i>
                 <span>Produits</span>
             </a>
@@ -71,10 +74,7 @@
                 <i class="nav-icon fa-solid fa-folder w-4 text-center text-gray-400"></i>
                 <span>Catégories</span>
             </a>
-            <a href="{% url 'dashboard:attributes' %}" class="sidebar-link {% if active_section == 'products' and 'attributes' in request.path %}nav-active{% endif %}">
-                <i class="nav-icon fa-solid fa-sliders w-4 text-center text-gray-400"></i>
-                <span>Attributs</span>
-            </a>
+
             <a href="{% url 'dashboard:stock' %}" class="sidebar-link {% if active_section == 'stock' %}nav-active{% endif %}">
                 <i class="nav-icon fa-solid fa-boxes-stacked w-4 text-center text-gray-400"></i>
                 <span>Stocks & Alertes</span>
@@ -90,6 +90,10 @@
                 <i class="nav-icon fa-solid fa-message w-4 text-center text-gray-400"></i>
                 <span>Avis Clients</span>
                 {% if pending_reviews_count %}<span class="badge bg-orange-100 text-orange-600 ml-auto">{{ pending_reviews_count }}</span>{% endif %}
+            </a>
+            <a href="{% url 'dashboard:sales_report' %}" class="sidebar-link {% if active_section == 'reports' %}nav-active{% endif %}">
+                <i class="nav-icon fa-solid fa-file-pdf w-4 text-center text-gray-400"></i>
+                <span>Rapport de Ventes</span>
             </a>
 
             <div class="sidebar-section">Administration</div>
@@ -172,5 +176,51 @@
 </div>
 
 {% block extra_scripts %}{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const handleConfirm = function(e) {
+        e.preventDefault();
+        const element = this;
+        const message = element.getAttribute('data-confirm');
+        
+        Swal.fire({
+            title: 'Confirmation',
+            text: message,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#8CC63F',
+            cancelButtonColor: '#ef4444',
+            confirmButtonText: 'Oui, confirmer',
+            cancelButtonText: 'Annuler',
+            customClass: {
+                title: 'text-lg font-bold font-sans text-gray-900',
+                htmlContainer: 'text-sm text-gray-600',
+                popup: 'rounded-2xl shadow-xl border border-gray-100',
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                element.removeAttribute('data-confirm'); // Ensure no loops
+                if (element.tagName === 'A') {
+                    window.location.href = element.href;
+                } else if (element.tagName === 'FORM') {
+                    element.submit();
+                } else if (element.tagName === 'BUTTON') {
+                    const form = element.closest('form');
+                    if (form) form.submit();
+                }
+            }
+        });
+    };
+
+    document.querySelectorAll('a[data-confirm], button[data-confirm]').forEach(el => {
+        el.addEventListener('click', handleConfirm);
+    });
+    
+    document.querySelectorAll('form[data-confirm]').forEach(form => {
+        form.addEventListener('submit', handleConfirm);
+    });
+});
+</script>
 </body>
 </html>

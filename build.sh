@@ -13,4 +13,4 @@ python manage.py migrate
 python manage.py collectstatic --no-input
 
 # Seed data if needed
-# python manage.py seed_stores
+python manage.py seed_stores

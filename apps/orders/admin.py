@@ -8,16 +8,14 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ['order_number', 'user', 'status', 'total', 'delivery_type', 'payment_status', 'created_at']
-    list_filter = ['status', 'payment_status', 'created_at', 'delivery_type']
-    search_fields = ['order_number', 'user__username', 'user__email']
+    list_display = ['order_number', 'client_id', 'statut', 'mt_total', 'pay_mode', 'date_com']
+    list_filter = ['statut', 'pay_mode', 'date_com']
+    search_fields = ['order_number', 'client_id__username', 'client_id__email']
     inlines = [OrderItemInline]
     
     fieldsets = (
         ('Informations Générales', {
-            'fields': ('user', 'status', 'total', 'payment_status')
-        }),
-        ('Livraison', {
-            'fields': ('delivery_type', 'store', 'address', 'assigned_delivery')
+            'fields': ('client_id', 'statut', 'mt_total', 'pay_mode')
         }),
     )
+

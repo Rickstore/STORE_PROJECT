@@ -35,17 +35,17 @@
                     <tr class="hover:bg-gray-50/50">
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-3">
-                                {% if item.product.image %}
-                                <img src="{{ item.product.image.url }}" class="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0">
+                                {% if item.product.img_path %}
+                                <img src="{{ item.product.img_path.url }}" class="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0">
                                 {% else %}
                                 <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center shrink-0">
                                     <i class="fa-solid fa-mobile text-gray-300"></i>
                                 </div>
                                 {% endif %}
                                 <div>
-                                    <p class="font-semibold text-gray-900">{{ item.product.name }}</p>
+                                    <p class="font-semibold text-gray-900">{{ item.product.nom_prod }}</p>
                                     <div class="flex gap-2">
-                                        <p class="text-[10px] text-gray-400">{{ item.product.brand }}</p>
+                                        <p class="text-[10px] text-gray-400">{{ item.product.cat_id.nom_cat }}</p>
                                         {% if item.color %}<span class="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">Couleur: {{ item.color }}</span>{% endif %}
                                         {% if item.capacity %}<span class="text-[10px] bg-gray-100 px-1.5 rounded text-gray-600">Capacité: {{ item.capacity }}</span>{% endif %}
                                     </div>
@@ -61,7 +61,7 @@
                 <tfoot>
                     <tr class="border-t border-gray-100 bg-gray-50/50">
                         <td colspan="3" class="px-5 py-3 text-right font-bold text-gray-700">Total :</td>
-                        <td class="px-5 py-3 text-right font-black text-gray-900 text-base">{{ order.total|floatformat:0 }} FCFA</td>
+                        <td class="px-5 py-3 text-right font-black text-gray-900 text-base">{{ order.mt_total|floatformat:0 }} FCFA</td>
                     </tr>
                 </tfoot>
             </table>
@@ -72,36 +72,30 @@
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                 <h3 class="font-bold text-gray-900 text-sm mb-3">Client</h3>
                 <div class="space-y-1.5 text-sm text-gray-600">
-                    <p><span class="text-gray-400 text-xs">Nom :</span> <span class="font-medium">{{ order.user.username }}</span></p>
-                    <p><span class="text-gray-400 text-xs">Email :</span> {{ order.user.email|default:"—" }}</p>
-                    <p><span class="text-gray-400 text-xs">Tél :</span> {{ order.user.phone|default:"—" }}</p>
+                    <p><span class="text-gray-400 text-xs">Nom :</span> <span class="font-medium">{{ order.client_id.username }}</span></p>
+                    <p><span class="text-gray-400 text-xs">Email :</span> {{ order.client_id.email|default:"—" }}</p>
+                    <p><span class="text-gray-400 text-xs">Tél :</span> {{ order.client_id.phone|default:"—" }}</p>
                 </div>
             </div>
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
                 <h3 class="font-bold text-gray-900 text-sm mb-3">Livraison</h3>
                 <div class="space-y-1.5 text-sm text-gray-600">
-                    <p><span class="text-gray-400 text-xs">Type :</span> <span class="font-medium">{{ order.get_delivery_type_display }}</span></p>
-                    {% if order.address %}
-                    <p><span class="text-gray-400 text-xs">Ville :</span> {{ order.address.city }}</p>
-                    <p><span class="text-gray-400 text-xs">Adresse :</span> {{ order.address.address }}</p>
-                    <p><span class="text-gray-400 text-xs">Tél :</span> {{ order.address.phone|default:"—" }}</p>
-                    {% elif order.store %}
-                    <p><span class="text-gray-400 text-xs">Magasin :</span> {{ order.store }}</p>
+                    {% if order.delivery %}
+                    <p><span class="text-gray-400 text-xs">Type :</span> <span class="font-medium">Livraison à domicile</span></p>
+                    <p><span class="text-gray-400 text-xs">Ville :</span> {{ order.delivery.get_ville_liv_display }}</p>
+                    <p><span class="text-gray-400 text-xs">Adresse :</span> {{ order.delivery.adr_prec }}</p>
+                    <p><span class="text-gray-400 text-xs">Tél :</span> {{ order.client_id.phone|default:"—" }}</p>
+                    {% if order.delivery.livreur_id %}
+                    <p><span class="text-gray-400 text-xs">Livreur :</span> <span class="font-semibold text-[#8CC63F]">{{ order.delivery.livreur_id.username }}</span></p>
                     {% endif %}
-                    {% if order.assigned_delivery %}
-                    <p><span class="text-gray-400 text-xs">Livreur :</span> <span class="font-semibold text-[#8CC63F]">{{ order.assigned_delivery.username }}</span></p>
+                    {% else %}
+                    <p><span class="text-gray-400 text-xs">Type :</span> <span class="font-medium">Retrait en magasin</span></p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Notes -->
-        {% if order.delivery_notes %}
-        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-            <h3 class="font-bold text-gray-900 text-sm mb-2">Notes de livraison</h3>
-            <p class="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">{{ order.delivery_notes }}</p>
-        </div>
-        {% endif %}
+
     </div>
 
     <!-- Right: Actions & Status -->
@@ -111,16 +105,15 @@
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h3 class="font-bold text-gray-900 text-sm mb-4">Statut actuel</h3>
             <div class="flex flex-col gap-2 mb-4">
-                <span class="px-3 py-2 rounded-lg text-sm font-bold text-center status-{{ order.status }}">
-                    {{ order.get_status_display }}
+                <span class="px-3 py-2 rounded-lg text-sm font-bold text-center status-{{ order.statut }}">
+                    {{ order.get_statut_display }}
                 </span>
-                <span class="px-3 py-2 rounded-lg text-sm font-bold text-center {% if order.payment_status == 'paid' %}status-paid{% elif order.payment_status == 'failed' %}status-failed{% else %}status-pending{% endif %}">
-                    Paiement : {{ order.get_payment_status_display }}
+                <span class="px-3 py-2 rounded-lg text-sm font-bold text-center bg-gray-100">
+                    Paiement : {{ order.get_pay_mode_display }}
                 </span>
             </div>
             <div class="text-xs text-gray-400 space-y-0.5">
-                <p>Créée le : <span class="text-gray-600 font-medium">{{ order.created_at|date:"d/m/Y à H:i" }}</span></p>
-                <p>Mise à jour : <span class="text-gray-600 font-medium">{{ order.updated_at|date:"d/m/Y à H:i" }}</span></p>
+                <p>Créée le : <span class="text-gray-600 font-medium">{{ order.date_com|date:"d/m/Y à H:i" }}</span></p>
             </div>
         </div>
 
@@ -131,8 +124,8 @@
                 {% csrf_token %}
                 <div class="space-y-2 mb-4">
                     {% for value, label in status_choices %}
-                    <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer {% if order.status == value %}bg-[#8CC63F]/8 border border-[#8CC63F]/30{% endif %}">
-                        <input type="radio" name="status" value="{{ value }}" class="text-[#8CC63F] focus:ring-[#8CC63F]" {% if order.status == value %}checked{% endif %}>
+                    <label class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 cursor-pointer {% if order.statut == value %}bg-[#8CC63F]/8 border border-[#8CC63F]/30{% endif %}">
+                        <input type="radio" name="status" value="{{ value }}" class="text-[#8CC63F] focus:ring-[#8CC63F]" {% if order.statut == value %}checked{% endif %}>
                         <span class="text-sm font-medium text-gray-700">{{ label }}</span>
                     </label>
                     {% endfor %}
@@ -144,7 +137,7 @@
         </div>
 
         <!-- Assign Livreur -->
-        {% if order.delivery_type == 'delivery' %}
+        {% if order.delivery %}
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <h3 class="font-bold text-gray-900 text-sm mb-4">Assigner un livreur</h3>
             <form method="post">
@@ -152,7 +145,7 @@
                 <select name="livreur_id" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-[#8CC63F]">
                     <option value="">-- Sélectionner un livreur --</option>
                     {% for livreur in livreurs %}
-                    <option value="{{ livreur.id }}" {% if order.assigned_delivery_id == livreur.id %}selected{% endif %}>{{ livreur.username }}</option>
+                    <option value="{{ livreur.id }}" {% if order.delivery.livreur_id_id == livreur.id %}selected{% endif %}>{{ livreur.username }}</option>
                     {% endfor %}
                 </select>
                 <button type="submit" class="w-full bg-gray-900 hover:bg-gray-700 text-white font-bold py-2.5 rounded-lg text-sm transition-colors">

@@ -11,46 +11,47 @@
     <h2 class="text-3xl font-extrabold text-gray-900 mb-4">Commande Confirmée !</h2>
     <p class="text-lg text-gray-600 mb-6">Votre commande <strong class="text-gray-900">{{ order.order_number }}</strong> a bien été enregistrée.</p>
 
-    {% if order.delivery_type == 'delivery' and order.delivery_code %}
-    <!-- ── Affichage compact du code de livraison sous le numéro de commande ── -->
-    <div class="inline-flex flex-col items-center bg-brand-green/5 border border-brand-green/20 rounded-2xl p-4 mb-8">
-        <span class="text-xs font-bold text-brand-green uppercase tracking-wider mb-2">Code de confirmation livraison</span>
-        <div class="flex gap-2">
-            {% for digit in order.delivery_code %}
-            <div class="w-10 h-12 bg-white border border-brand-green/30 rounded-lg flex items-center justify-center shadow-sm">
-                <span class="text-xl font-black text-brand-green">{{ digit }}</span>
+    {% if order.delivery and order.delivery_code %}
+        {% if order.statut == 'expedie' %}
+        <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6 shadow-sm text-center">
+            <h3 class="text-lg font-bold text-blue-900 mb-2"><i class="fa-solid fa-shield-halved mr-2"></i>Code secret de Livraison</h3>
+            <p class="text-blue-700 text-sm mb-3">Votre livreur est en route ! Communiquez-lui ce code pour vous remettre votre commande.</p>
+            <div class="bg-white border-2 border-dashed border-blue-300 rounded-lg py-3 px-6 inline-block">
+                <span class="text-3xl font-black text-blue-700 tracking-widest">{{ order.delivery_code }}</span>
             </div>
-            {% endfor %}
         </div>
-        <p class="text-[10px] text-gray-400 mt-2 italic">A présenter au livreur à la réception</p>
-    </div>
+        {% else %}
+        <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg mb-6 text-center">
+            <i class="fa-solid fa-lock text-gray-400 text-2xl mb-2 block"></i>
+            <p class="text-sm text-gray-500 font-medium">Un code de livraison a été généré pour votre commande. Il sera visible ici une fois que le livreur aura pris en charge votre commande.</p>
+        </div>
+        {% endif %}
     {% endif %}
 
 
-    {% if order.delivery_type == 'delivery' and order.payment_status != 'paid' %}
+
+
+
+    {% if order.delivery and order.pay_mode == 'cash' %}
     <div class="bg-green-50 border border-green-200 p-4 rounded-lg mb-6">
         <p class="text-sm text-green-700 font-medium">
-            <i class="fa-solid fa-truck mr-2"></i>Paiement à la livraison — préparez le montant exact : <strong>{{ order.total }} FCFA</strong>
+            <i class="fa-solid fa-truck mr-2"></i>Paiement à la livraison — préparez le montant exact : <strong>{{ order.mt_total }} FCFA</strong>
         </p>
     </div>
     {% endif %}
 
-    {% if order.payment_status != 'paid' and order.delivery_type != 'delivery' %}
+    {% if order.pay_mode != 'cash' and order.statut == 'en_attente' %}
     <div class="bg-gray-50 border border-gray-200 p-6 rounded-md mb-8">
         <h3 class="text-xl font-bold text-gray-800 mb-2">Validez le paiement Mobile Money</h3>
-        <p class="text-gray-600">Montant : <strong class="text-brand-green text-xl">{{ order.total }} FCFA</strong></p>
+        <p class="text-gray-600">Montant : <strong class="text-brand-green text-xl">{{ order.mt_total }} FCFA</strong></p>
         <p class="text-sm text-gray-500 mt-2">Confirmez depuis votre téléphone. La préparation débutera automatiquement.</p>
     </div>
     {% endif %}
 
     <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mt-4">
-        {% if order.payment_status == 'paid' %}
+        {% if order.statut != 'en_attente' %}
             <a href="{% url 'orders:export_order_pdf' order.order_number %}" class="inline-flex justify-center items-center px-6 py-3 rounded-md text-white bg-red-600 hover:bg-red-700 font-medium shadow-sm">
                 <i class="fa-solid fa-file-pdf mr-2"></i> Télécharger ma facture PDF
-            </a>
-        {% else %}
-            <a href="{% url 'payments:simulate_payment_success' order.order_number %}" class="inline-flex justify-center items-center px-6 py-3 rounded-md text-white bg-blue-600 hover:bg-blue-700 font-medium shadow-sm animate-pulse">
-                <i class="fa-solid fa-flask mr-2"></i> Simuler le Paiement (Mode Test)
             </a>
         {% endif %}
         <a href="{% url 'orders:order_history' %}" class="inline-flex justify-center items-center px-6 py-3 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 font-medium shadow-sm">

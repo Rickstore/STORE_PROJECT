@@ -97,9 +97,8 @@ function showToast(message, type = 'success') {
 }
 
 
-// ── AJAX : Ajouter au panier sans rechargement ──────────────────────────────
+// ── AJAX : Gestion du panier sans rechargement ──────────────────────────────
 function getCsrfToken() {
-    // Lit le cookie csrftoken
     const name = 'csrftoken';
     const cookies = document.cookie.split(';');
     for (let c of cookies) {
@@ -109,50 +108,178 @@ function getCsrfToken() {
     return '';
 }
 
-document.addEventListener('click', function (e) {
-    const btn = e.target.closest('.ajax-add-to-cart');
-    if (!btn) return;
+function updateCartBadges(count) {
+    document.querySelectorAll('.cart-count').forEach(el => {
+        el.textContent = count;
+        el.style.transform = 'scale(1.4)';
+        setTimeout(() => el.style.transform = '', 250);
+    });
+}
 
-    e.preventDefault();
-    const url = btn.dataset.url;
-    if (!url) return;
+// 1. Ajout au panier (Formulaire de la page détail)
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartForm = document.getElementById('add-to-cart-form');
+    if (addToCartForm) {
+        addToCartForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('.ajax-submit-cart');
+            const url = this.action;
+            const formData = new FormData(this);
 
-    // Retour visuel immédiat
-    btn.disabled = true;
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+            btn.disabled = true;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-lg"></i>';
 
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                updateCartBadges(data.count || data.total_items);
+                showToast(data.message, data.success ? 'success' : 'error');
+                
+                btn.innerHTML = '<i class="fa-solid fa-check text-lg"></i>';
+                btn.style.background = '#16A34A';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 1500);
+            })
+            .catch(() => {
+                showToast('Erreur lors de l\'ajout au panier', 'error');
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            });
+        });
+    }
+});
+
+// 2. Mise à jour des quantités et Suppression (Page Panier)
+document.addEventListener('click', function(e) {
+    // Boutons +/-
+    const qBtn = e.target.closest('.q-minus, .q-plus');
+    if (qBtn) {
+        const wrap = qBtn.closest('.cart-item-form');
+        const input = wrap.querySelector('.q-input');
+        const url = wrap.dataset.url;
+        
+        if (qBtn.classList.contains('q-minus')) input.stepDown();
+        else input.stepUp();
+        
+        updateCartItem(url, input.value, wrap);
+    }
+
+    // Suppression
+    const removeBtn = e.target.closest('.ajax-remove-from-cart');
+    if (removeBtn) {
+        const url = removeBtn.dataset.url;
+        const itemKey = removeBtn.dataset.itemKey;
+        removeCartItem(url, itemKey, removeBtn.closest('.bg-white'));
+    }
+
+    // Ajout direct (Cards)
+    const addBtn = e.target.closest('.ajax-add-to-cart');
+    if (addBtn) {
+        e.preventDefault();
+        const url = addBtn.dataset.url;
+        const originalHTML = addBtn.innerHTML;
+        
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            updateCartBadges(data.total_items || data.count);
+            showToast(data.message, data.success ? 'success' : 'error');
+            
+            addBtn.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i>';
+            setTimeout(() => {
+                addBtn.innerHTML = originalHTML;
+                addBtn.disabled = false;
+            }, 1000);
+        })
+        .catch(() => {
+            showToast('Erreur lors de l\'ajout', 'error');
+            addBtn.innerHTML = originalHTML;
+            addBtn.disabled = false;
+        });
+    }
+});
+
+function updateCartItem(url, quantity, container) {
     fetch(url, {
         method: 'POST',
         headers: {
             'X-CSRFToken': getCsrfToken(),
             'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: new URLSearchParams({ quantity: 1 }),
+        body: `quantity=${quantity}`
     })
     .then(r => r.json())
     .then(data => {
-        // Mettre à jour tous les badges du panier
-        document.querySelectorAll('.cart-count').forEach(el => {
-            el.textContent = data.count;
-            // Petite animation de rebond
-            el.style.transform = 'scale(1.4)';
-            setTimeout(() => el.style.transform = '', 250);
-        });
-        showToast(data.message, data.success ? 'success' : 'error');
-
-        // Animation du bouton : coche verte puis retour au statut initial
-        btn.innerHTML = '<i class="fa-solid fa-check text-xs"></i>';
-        btn.style.background = '#16A34A';
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.style.background = '';
-            btn.disabled = false;
-        }, 1200);
-    })
-    .catch(() => {
-        showToast('Erreur réseau, veuillez réessayer.', 'error');
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
+        if (data.success) {
+            updateCartBadges(data.count);
+            
+            if (data.removed) {
+                container.closest('.bg-white').remove();
+            } else {
+                // Mettre à jour le total de l'article
+                const itemTotal = container.closest('.flex-row').querySelector('.item-total');
+                if (itemTotal) itemTotal.textContent = data.item_total.toLocaleString() + ' FCFA';
+            }
+            
+            // Mettre à jour le total général
+            document.querySelectorAll('.cart-total-price').forEach(el => {
+                el.textContent = data.total_price.toLocaleString() + ' FCFA';
+            });
+            
+            if (data.count === 0) location.reload();
+        } else {
+            showToast(data.message, 'error');
+        }
     });
-});
+}
+
+function removeCartItem(url, itemKey, element) {
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            updateCartBadges(data.count);
+            document.querySelectorAll('.cart-total-price').forEach(el => {
+                el.textContent = data.total_price.toLocaleString() + ' FCFA';
+            });
+            
+            // Animation de sortie
+            element.style.transition = 'all 0.5s ease';
+            element.style.opacity = '0';
+            element.style.transform = 'translateX(20px)';
+            setTimeout(() => {
+                element.remove();
+                if (data.count === 0) location.reload();
+            }, 500);
+            
+            showToast(data.message);
+        }
+    });
+}

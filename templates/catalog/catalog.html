@@ -6,19 +6,18 @@
 <div class="flex flex-col md:flex-row gap-8">
     <!-- Filters Sidebar -->
     <aside class="w-full md:w-64 flex-shrink-0">
-        <form action="{% url 'catalog:catalog' %}" method="get" class="bg-white p-5 rounded-lg shadow-sm border border-gray-200" id="filterForm">
+        <form action="{% url 'catalog:catalog' %}" method="get" class="bg-white dark:bg-[#1E1E1E] p-5 rounded-lg shadow-sm border border-gray-200 dark:border-white/5 transition-colors duration-500" id="filterForm">
             <!-- Hidden search query to preserve it -->
             {% if search_query %}
             <input type="hidden" name="q" value="{{ search_query }}">
             {% endif %}
             
-            <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Catégories</h3>
+            <h3 class="font-bold text-lg text-gray-800 dark:text-white mb-4 border-b dark:border-white/5 pb-2">Catégories</h3>
             <ul class="flex flex-wrap gap-2 mb-6">
-                <li>
                     <label class="cursor-pointer">
-                        <input type="radio" name="category" value="" {% if not current_category %}checked{% endif %} class="hidden" onchange="document.getElementById('filterForm').submit();">
+                        <input type="radio" name="category" value="" {% if not current_category %}checked{% endif %} class="hidden filter-input">
                         <span class="px-4 py-2 rounded-full border text-xs font-bold transition-all inline-block
-                            {% if not current_category %}bg-brand-green border-brand-green text-black{% else %}bg-white border-gray-200 text-gray-500 hover:border-brand-green hover:text-brand-green{% endif %}">
+                            {% if not current_category %}bg-brand-green border-brand-green text-black{% else %}bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-brand-green hover:text-brand-green{% endif %}">
                             Tout
                         </span>
                     </label>
@@ -26,115 +25,181 @@
                 {% for category in categories %}
                 <li>
                     <label class="cursor-pointer">
-                        <input type="radio" name="category" value="{{ category.slug }}" {% if current_category == category.slug %}checked{% endif %} class="hidden" onchange="document.getElementById('filterForm').submit();">
+                        <input type="radio" name="category" value="{{ category.slug_cat }}" {% if current_category == category.slug_cat %}checked{% endif %} class="hidden filter-input">
                         <span class="px-4 py-2 rounded-full border text-xs font-bold transition-all inline-block
-                            {% if current_category == category.slug %}bg-brand-green border-brand-green text-black{% else %}bg-white border-gray-200 text-gray-500 hover:border-brand-green hover:text-brand-green{% endif %}">
-                            {{ category.name }}
+                            {% if current_category == category.slug_cat %}bg-brand-green border-brand-green text-black{% else %}bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-brand-green hover:text-brand-green{% endif %}">
+                            {{ category.nom_cat }}
                         </span>
                     </label>
                 </li>
                 {% endfor %}
             </ul>
 
-            <h3 class="font-bold text-lg text-gray-800 mb-4 border-b pb-2">Marques</h3>
-            <ul class="flex flex-wrap gap-2 mb-6">
-                <li>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="brand" value="" {% if not current_brand %}checked{% endif %} class="hidden" onchange="document.getElementById('filterForm').submit();">
-                        <span class="px-4 py-2 rounded-full border text-xs font-bold transition-all inline-block
-                            {% if not current_brand %}bg-brand-green border-brand-green text-black{% else %}bg-white border-gray-200 text-gray-500 hover:border-brand-green hover:text-brand-green{% endif %}">
-                            Toutes
-                        </span>
-                    </label>
-                </li>
-                {% for b in brands %}
-                <li>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="brand" value="{{ b }}" {% if current_brand == b %}checked{% endif %} class="hidden" onchange="document.getElementById('filterForm').submit();">
-                        <span class="px-4 py-2 rounded-full border text-xs font-bold transition-all inline-block
-                            {% if current_brand == b %}bg-brand-green border-brand-green text-black{% else %}bg-white border-gray-200 text-gray-500 hover:border-brand-green hover:text-brand-green{% endif %}">
-                            {{ b }}
-                        </span>
-                    </label>
-                </li>
-                {% endfor %}
-            </ul>
-
-            <h3 class="font-bold text-sm text-gray-800 mb-3 border-b pb-2">Prix (FCFA)</h3>
+            <h3 class="font-bold text-sm text-gray-800 dark:text-white mb-3 border-b dark:border-white/5 pb-2">Prix (FCFA)</h3>
             <div class="flex items-center space-x-2 mb-4">
                 <input type="number" name="min_price" value="{{ current_min_price }}" placeholder="Min" class="w-full border-gray-200 rounded-md text-xs shadow-sm focus:ring-brand-green focus:border-brand-green border p-2">
                 <span class="text-gray-400">-</span>
                 <input type="number" name="max_price" value="{{ current_max_price }}" placeholder="Max" class="w-full border-gray-200 rounded-md text-xs shadow-sm focus:ring-brand-green focus:border-brand-green border p-2">
             </div>
 
-            <h3 class="font-bold text-sm text-gray-800 mb-3 border-b pb-2">État</h3>
+            <h3 class="font-bold text-sm text-gray-800 dark:text-white mb-3 border-b dark:border-white/5 pb-2">État</h3>
             <div class="flex flex-wrap gap-2 mb-6">
-                <span class="px-3 py-1.5 rounded-full border border-gray-100 text-[10px] font-bold text-gray-400 bg-gray-50 cursor-not-allowed">Neuf</span>
-                <span class="px-3 py-1.5 rounded-full border border-gray-100 text-[10px] font-bold text-gray-400 bg-gray-50 cursor-not-allowed">Occasion</span>
+                <label class="cursor-pointer">
+                    <input type="radio" name="state" value="" {% if not current_state %}checked{% endif %} class="hidden filter-input">
+                    <span class="px-3 py-1.5 rounded-full border text-[10px] font-bold transition-all inline-block
+                        {% if not current_state %}bg-brand-green border-brand-green text-black{% else %}bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-brand-green hover:text-brand-green{% endif %}">
+                        Tout
+                    </span>
+                </label>
+                <label class="cursor-pointer">
+                    <input type="radio" name="state" value="second_hand" {% if current_state == 'second_hand' %}checked{% endif %} class="hidden filter-input">
+                    <span class="px-3 py-1.5 rounded-full border text-[10px] font-bold transition-all inline-block
+                        {% if current_state == 'second_hand' %}bg-orange-500 border-orange-500 text-white{% else %}bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-orange-500 hover:text-orange-500{% endif %}">
+                        Occasion
+                    </span>
+                </label>
             </div>
             
-            <button type="submit" class="w-full bg-brand-green hover:bg-opacity-80 active:scale-95 text-black font-bold py-2 rounded-md transition-all text-sm shadow-sm">
+            <button type="submit" class="w-full bg-brand-dark hover:bg-black text-white font-bold py-2 rounded-md transition-all text-sm shadow-sm md:hidden">
                 Filtrer
             </button>
         </form>
     </aside>
 
-    <!-- Products Grid -->
-    <div class="flex-grow">
-        <div class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Catalogue</h1>
-                <span class="text-sm text-gray-500">{{ paginator.count }} produit(s) trouvé(s)</span>
-            </div>
-            
-            <!-- Search Bar -->
-            <form action="{% url 'catalog:catalog' %}" method="get" class="w-full sm:w-auto flex transform transition hover:scale-[1.02]">
-                {% if current_category %}
-                <input type="hidden" name="category" value="{{ current_category }}">
-                {% endif %}
-                {% if current_brand %}
-                <input type="hidden" name="brand" value="{{ current_brand }}">
-                {% endif %}
-                <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Rechercher un produit..." class="w-full sm:w-64 border-gray-300 rounded-l-md shadow-sm focus:ring-brand-green focus:border-brand-green border p-2 text-sm transition-all focus:w-72">
-                <button type="submit" class="bg-brand-dark hover:bg-brand-green hover:text-black transition-colors text-white px-4 py-2 rounded-r-md">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </button>
-            </form>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-            {% for product in products %}
-                {% include 'components/product_card.html' with product=product %}
-            {% empty %}
-                <div class="col-span-full py-12 text-center bg-white rounded border border-gray-100">
-                    <p class="text-gray-500">Aucun produit ne correspond à votre recherche.</p>
-                    <a href="{% url 'catalog:catalog' %}" class="text-brand-green mt-2 inline-block hover:underline">Voir tout le catalogue</a>
-                </div>
-            {% endfor %}
-        </div>
-
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <div class="mt-12 flex justify-center">
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_brand %}&brand={{ current_brand }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
-                        Précédent
-                    </a>
-                {% endif %}
-                
-                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-brand-green text-sm font-bold text-black transform scale-[1.02] shadow-sm z-10">
-                    Page {{ page_obj.number }} sur {{ paginator.num_pages }}
-                </span>
-                
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_brand %}&brand={{ current_brand }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
-                        Suivant
-                    </a>
-                {% endif %}
-            </nav>
-        </div>
-        {% endif %}
+    <!-- Products Grid Container -->
+    <div class="flex-grow" id="productListContainer">
+        {% include 'catalog/product_list_partial.html' %}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const productListContainer = document.getElementById('productListContainer');
+    
+    if (!filterForm || !productListContainer) return;
+
+    // Fonction pour charger les produits via AJAX
+    function loadProducts(url, updateHistory = true) {
+        // Ajouter un indicateur de chargement
+        productListContainer.style.opacity = '0.5';
+        productListContainer.style.pointerEvents = 'none';
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            productListContainer.innerHTML = html;
+            productListContainer.style.opacity = '1';
+            productListContainer.style.pointerEvents = 'auto';
+            
+            if (updateHistory) {
+                window.history.pushState({}, '', url);
+            }
+            
+            // Mettre à jour visuellement les filtres sélectionnés (Catégories et États)
+            updateActiveFilters();
+            
+            // Re-lier les événements pour la nouvelle pagination ou recherche
+            bindPaginationLinks();
+        })
+        .catch(error => {
+            console.error('Error loading products:', error);
+            productListContainer.style.opacity = '1';
+            productListContainer.style.pointerEvents = 'auto';
+        });
+    }
+
+    function updateActiveFilters() {
+        // --- Categories ---
+        const catRadios = filterForm.querySelectorAll('input[name="category"]');
+        catRadios.forEach(radio => {
+            const span = radio.nextElementSibling;
+            if (radio.checked) {
+                span.classList.remove('bg-white', 'dark:bg-white/5', 'border-gray-200', 'border-gray-100', 'dark:border-white/10', 'text-gray-500', 'dark:text-gray-400', 'hover:border-brand-green', 'hover:text-brand-green');
+                span.classList.add('bg-brand-green', 'border-brand-green', 'text-black');
+            } else {
+                span.classList.remove('bg-brand-green', 'border-brand-green', 'text-black');
+                span.classList.add('bg-white', 'dark:bg-white/5', 'border-gray-200', 'dark:border-white/10', 'text-gray-500', 'dark:text-gray-400', 'hover:border-brand-green', 'hover:text-brand-green');
+            }
+        });
+
+        // --- States ---
+        const stateRadios = filterForm.querySelectorAll('input[name="state"]');
+        stateRadios.forEach(radio => {
+            const span = radio.nextElementSibling;
+            // The "Occasion" radio uses orange classes, others use green
+            if (radio.checked) {
+                if (radio.value === 'second_hand') {
+                    span.classList.remove('bg-white', 'dark:bg-white/5', 'border-gray-200', 'dark:border-white/10', 'text-gray-500', 'dark:text-gray-400', 'hover:border-orange-500', 'hover:text-orange-500');
+                    span.classList.add('bg-orange-500', 'border-orange-500', 'text-white');
+                } else {
+                    span.classList.remove('bg-white', 'dark:bg-white/5', 'border-gray-200', 'dark:border-white/10', 'text-gray-500', 'dark:text-gray-400', 'hover:border-brand-green', 'hover:text-brand-green');
+                    span.classList.add('bg-brand-green', 'border-brand-green', 'text-black');
+                }
+            } else {
+                if (radio.value === 'second_hand') {
+                    span.classList.remove('bg-orange-500', 'border-orange-500', 'text-white');
+                    span.classList.add('bg-white', 'dark:bg-white/5', 'border-gray-200', 'dark:border-white/10', 'text-gray-500', 'dark:text-gray-400', 'hover:border-orange-500', 'hover:text-orange-500');
+                } else {
+                    span.classList.remove('bg-brand-green', 'border-brand-green', 'text-black');
+                    span.classList.add('bg-white', 'dark:bg-white/5', 'border-gray-200', 'dark:border-white/10', 'text-gray-500', 'dark:text-gray-400', 'hover:border-brand-green', 'hover:text-brand-green');
+                }
+            }
+        });
+    }
+
+    // Intercepter les changements dans le formulaire
+    filterForm.addEventListener('change', function(e) {
+        if (e.target.classList.contains('filter-input') || e.target.type === 'radio' || e.target.type === 'number') {
+            const formData = new FormData(filterForm);
+            const params = new URLSearchParams(formData);
+            const url = `${filterForm.action}?${params.toString()}`;
+            loadProducts(url);
+        }
+    });
+
+    // Optionnel : Gérer le clic sur "Filtrer" (pour mobile ou prix)
+    filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        const url = `${filterForm.action}?${params.toString()}`;
+        loadProducts(url);
+    });
+
+    // Intercepter la pagination
+    function bindPaginationLinks() {
+        document.querySelectorAll('.ajax-page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                loadProducts(this.href);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+        
+        // Gérer aussi le formulaire de recherche qui est dans le partial
+        const searchForm = document.getElementById('catalogSearchForm');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(searchForm);
+                const params = new URLSearchParams(formData);
+                const url = `${searchForm.action}?${params.toString()}`;
+                loadProducts(url);
+            });
+        }
+    }
+
+    // Gérer le bouton "Précédent" du navigateur
+    window.addEventListener('popstate', function() {
+        loadProducts(window.location.href, false);
+    });
+
+    bindPaginationLinks();
+});
+</script>
 {% endblock %}

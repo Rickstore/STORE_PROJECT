@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Address
+from .models import CustomUser
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -10,11 +10,7 @@ class CustomUserAdmin(UserAdmin):
     ordering = ('-date_joined',)
     
     fieldsets = UserAdmin.fieldsets + (
-        ('Informations Complémentaires', {'fields': ('role', 'phone')}),
+        ('Informations Complémentaires', {'fields': ('role', 'phone', 'ville', 'adresse', 'avatar', 'must_reset', 'solde_coll', 'is_dispo')}),
     )
     
-@admin.register(Address)
-class AddressAdmin(admin.ModelAdmin):
-    list_display = ('user', 'city', 'phone', 'created_at')
-    list_filter = ('city',)
-    search_fields = ('user__username', 'address', 'phone')
+

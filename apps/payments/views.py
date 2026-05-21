@@ -23,7 +23,7 @@ def nelsius_webhook(request):
         payload = json.loads(request.body)
         
         reference = payload.get('reference') # Correspond au order_number
-        status = payload.get('status')
+        status = payload.get('status', '').upper()
         
         if not reference or not status:
             return JsonResponse({"error": "Bad request format"}, status=400)
@@ -37,17 +37,21 @@ def nelsius_webhook(request):
 
         # 3. Traiter le paiement réussi
         if status == 'SUCCESS':
-            # Eviter le double-traitement si déjà payé
-            if order.payment_status != 'paid':
-                OrderService.confirm_payment_and_deduct_stock(order)
-                logger.info(f"Order {order.order_number} payment confirmed and stock deducted via webhook.")
+            from apps.payments.models import Payment
+            payment, created = Payment.objects.get_or_create(
+                com_id=order,
+                defaults={'mode_pay': order.pay_mode, 'mt_paye': order.mt_total, 'is_valide': True, 'ref_trans': reference}
+            )
+            if not payment.is_valide:
+                payment.is_valide = True
+                payment.save(update_fields=['is_valide'])
+            logger.info(f"Order {order.order_number} payment marked as successful via webhook.")
 
         # 4. Traiter le paiement échoué
         elif status == 'FAILED':
-            if order.payment_status != 'paid': # Si ce n'est pas déjà payé
-                order.payment_status = 'failed'
-                order.status = 'failed'
-                order.save()
+            if order.statut != 'valide': # Si ce n'est pas déjà payé
+                order.statut = 'annule'
+                order.save(update_fields=['statut'])
                 logger.info(f"Order {order.order_number} payment failed via webhook.")
 
         return JsonResponse({"message": "Webhook processed successfully"}, status=200)
@@ -57,21 +61,4 @@ def nelsius_webhook(request):
     except Exception as e:
         logger.error(f"Webhook processing error: {str(e)}")
         return JsonResponse({"error": "Internal server error"}, status=500)
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 
-@login_required
-def simulate_payment_success(request, order_number):
-    """
-    Simulation de paiement réussi pour les tests.
-    """
-    order = get_object_or_404(Order, order_number=order_number, user=request.user)
-    
-    if order.payment_status != 'paid':
-        OrderService.confirm_payment_and_deduct_stock(order)
-        messages.success(request, f"Paiement simulé avec succès pour la commande {order_number} !")
-    else:
-        messages.info(request, "Cette commande est déjà payée.")
-        
-    return redirect('orders:order_success', order_number=order.order_number)

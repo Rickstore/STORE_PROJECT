@@ -16,6 +16,7 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut Livraison</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code Secret</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut Paiement</th>
                         </tr>
                     </thead>
@@ -24,39 +25,40 @@
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
                                 <div>{{ order.order_number }}</div>
-                                {% if order.status != 'delivered' and order.status != 'failed' and order.delivery_code %}
-                                <div class="mt-1 flex items-center gap-1.5">
-                                    <span class="text-[10px] font-bold text-brand-green uppercase tracking-tight">Code livraison :</span>
-                                    <span class="inline-flex gap-0.5">
-                                        {% for digit in order.delivery_code %}
-                                        <span class="w-4 h-5 bg-brand-green/10 border border-brand-green/20 rounded-sm flex items-center justify-center text-[10px] font-black text-brand-green">{{ digit }}</span>
-                                        {% endfor %}
-                                    </span>
-                                </div>
-                                {% endif %}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ order.created_at|date:"d M Y, H:i" }}
+                                {{ order.date_com|date:"d M Y, H:i" }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                {{ order.total }} FCFA
+                                {{ order.mt_total }} FCFA
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if order.status == 'delivered' %}bg-green-100 text-green-800
-                                    {% elif order.status == 'pending' %}bg-gray-100 text-gray-800
-                                    {% elif order.status == 'failed' %}bg-red-100 text-red-800
+                                    {% if order.statut == 'livre' %}bg-green-100 text-green-800
+                                    {% elif order.statut == 'en_attente' %}bg-gray-100 text-gray-800
+                                    {% elif order.statut == 'annule' %}bg-red-100 text-red-800
                                     {% else %}bg-blue-100 text-blue-800{% endif %}">
-                                    {{ order.get_status_display }}
+                                    {{ order.get_statut_display }}
                                 </span>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">
+                                {% if order.delivery_code and order.statut != 'livre' %}
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded font-mono tracking-widest text-xs shadow-sm border border-blue-200">{{ order.delivery_code }}</span>
+                                {% else %}
+                                    <span class="text-gray-400">—</span>
+                                {% endif %}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {% if order.payment_status == 'paid' %}bg-green-100 text-green-800
-                                    {% elif order.payment_status == 'failed' %}bg-red-100 text-red-800
-                                    {% else %}bg-orange-100 text-orange-800{% endif %}">
-                                    {{ order.get_payment_status_display }}
-                                </span>
+                                {% if order.pay_mode == 'cash' and order.statut != 'livre' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-amber-100 text-amber-800">
+                                        En attente
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800">
+                                        Payée
+                                    </span>
+                                {% endif %}
+                                <div class="text-[10px] text-gray-500 mt-1 font-medium">{{ order.get_pay_mode_display }}</div>
                             </td>
                         </tr>
                         {% endfor %}

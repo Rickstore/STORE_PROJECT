@@ -41,10 +41,10 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identifiant</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Livreur</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'ajout</th>
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Livraisons</th>
+                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Solde à collecter</th>
                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
@@ -53,45 +53,53 @@
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-[#8CC63F]/20 flex items-center justify-center text-[#8CC63F] font-bold">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-brand-green/20 flex items-center justify-center text-brand-green font-bold">
                                 {{ livreur.username|slice:":1"|upper }}
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">{{ livreur.username }}</div>
-                                <div class="text-sm text-gray-500">ID: #{{ livreur.id }}</div>
+                                <div class="text-sm font-bold text-gray-900">{{ livreur.get_full_name|default:livreur.username }}</div>
+                                <div class="text-xs text-gray-500">@{{ livreur.username }}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900"><i class="fa-solid fa-envelope w-4 mr-1 text-gray-400"></i> {{ livreur.email }}</div>
-                        <div class="text-sm text-gray-500 mt-1"><i class="fa-solid fa-phone w-4 mr-1 text-gray-400"></i> {{ livreur.phone|default:"Non renseigné" }}</div>
+                        <div class="text-sm text-gray-900"><i class="fa-solid fa-phone w-4 mr-1 text-gray-400"></i> {{ livreur.phone|default:"-" }}</div>
+                        <div class="text-xs text-gray-500 font-mono">{{ livreur.email }}</div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        {% if livreur.is_active %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                Actif
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                            {{ livreur.commandes_livrees }} effectuées
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        {% if livreur.solde_coll >= 100000 %}
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-800 border border-red-200 animate-pulse ring-2 ring-red-50" title="Alerte : Trop d'argent collecté !">
+                                {{ livreur.solde_coll|floatformat:0 }} FCFA
+                            </span>
+                        {% elif livreur.solde_coll == 0 %}
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800 border border-green-200">
+                                0 FCFA
                             </span>
                         {% else %}
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                Inactif
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                {{ livreur.solde_coll|floatformat:0 }} FCFA
                             </span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ livreur.date_joined|date:"d M Y" }}
-                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div class="flex items-center justify-end space-x-3">
-                            <a href="{% url 'dashboard:edit_livreur' livreur.id %}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded-md transition-colors" title="Modifier">
-                                <i class="fa-solid fa-pen"></i>
-                            </a>
-                            
-                            <form action="{% url 'dashboard:delete_livreur' livreur.id %}" method="post" class="inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer le livreur {{ livreur.username }} ?');">
+                        <div class="flex items-center justify-end space-x-2">
+                            {% if livreur.solde_coll > 0 %}
+                            <form action="{% url 'dashboard:encaisser_solde' livreur.id %}" method="post" class="inline" data-confirm="Confirmer l'encaissement de {{ livreur.solde_coll }} FCFA pour {{ livreur.username }} ?">
                                 {% csrf_token %}
-                                <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded-md transition-colors" title="Supprimer">
-                                    <i class="fa-solid fa-trash"></i>
+                                <button type="submit" class="bg-gray-900 hover:bg-black text-white px-3 py-1.5 rounded-lg transition-colors font-bold text-xs flex items-center">
+                                    <i class="fa-solid fa-money-bill-transfer mr-1.5"></i> Encaisser
                                 </button>
                             </form>
+                            {% endif %}
+                            
+                            <a href="{% url 'dashboard:edit_livreur' livreur.id %}" class="text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-colors" title="Modifier">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
