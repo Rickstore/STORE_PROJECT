@@ -176,3 +176,8 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='AUDSTOREsarl <noreply@audstore.com>')
+
+# Notch Pay Configuration
+NOTCHPAY_PUBLIC_KEY = env('NOTCH_PUBLIC_KEY', default='')
+NOTCHPAY_PRIVATE_KEY = env('NOTCH_PRIVATE_KEY', default='')
+NOTCHPAY_HASH_KEY = env('NOTCH_HASH_KEY', default='')

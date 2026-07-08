@@ -4,7 +4,7 @@ from django.contrib import messages
 from apps.cart.services import CartService
 from .services import OrderService
 from apps.catalog.models import Store
-from apps.payments.services import NelsiusService
+from apps.payments.services import NotchPayService
 from .models import Order
 
 @login_required
@@ -47,7 +47,7 @@ def checkout(request):
                 messages.success(request, "Commande confirmée ! Votre livreur encaissera le paiement à la livraison.")
                 return redirect('orders:order_success', order_number=order.order_number)
             else:
-                # Initiate Nelsius Pay Payment (Orange Money / MTN)
+                # Initiate Notch Pay Payment (Orange Money / MTN)
                 phone_for_payment = (
                     request.POST.get('payment_phone', '').strip()
                     or request.POST.get('mtn_phone', '').strip()
@@ -60,22 +60,22 @@ def checkout(request):
                 import logging
                 logger = logging.getLogger(__name__)
 
-                nelsius = NelsiusService()
+                notchpay = NotchPayService()
                 try:
-                    response = nelsius.initiate_payment(order, provider, phone_for_payment)
-                    logger.info(f"[Nelsius] Réponse API pour commande {order.order_number}: {response}")
+                    # On utilise direct_charge pour ne pas rediriger l'utilisateur ailleurs
+                    response = notchpay.direct_charge(order, provider, phone_for_payment)
+                    logger.info(f"[NotchPay Direct] Réponse API pour commande {order.order_number}: {response}")
 
-                    # Vérifier si l'API signale un échec
-                    if isinstance(response, dict) and response.get('success') is False:
-                        error_msg = response.get('message', 'Erreur inconnue de l\'opérateur.')
-                        messages.error(request, f"Paiement refusé par l'opérateur : {error_msg}")
-                        return redirect('orders:checkout')
+                    if isinstance(response, dict) and response.get('simulation'):
+                        messages.success(request, "Commande confirmée ! (Mode Simulation)")
+                        return redirect('orders:order_success', order_number=order.order_number)
 
-                    messages.success(request, "Commande reçue ! Confirmez le paiement sur votre mobile (prompt USSD). Elle sera validée automatiquement.")
+                    # Notch Pay a initié la requête USSD sur le téléphone du client
+                    messages.success(request, "Commande reçue ! Veuillez confirmer le paiement sur votre téléphone (prompt USSD).")
                     return redirect('orders:order_success', order_number=order.order_number)
 
                 except Exception as payment_error:
-                    logger.error(f"[Nelsius] Erreur paiement commande {order.order_number}: {payment_error}")
+                    logger.error(f"[NotchPay] Erreur paiement commande {order.order_number}: {payment_error}")
                     messages.error(request, f"Erreur lors de l'initiation du paiement mobile : {payment_error}")
                     return redirect('orders:checkout')
 
@@ -85,11 +85,11 @@ def checkout(request):
             
     # GET
     stores = Store.objects.all()
-    nelsius = NelsiusService()
+    notchpay = NotchPayService()
     return render(request, 'orders/checkout.html', {
         'cart': cart, 
         'stores': stores,
-        'is_sandbox': nelsius.simulation_mode
+        'is_sandbox': notchpay.simulation_mode
     })
 
 @login_required

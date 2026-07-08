@@ -4,5 +4,5 @@ from . import views
 app_name = 'payments'
 
 urlpatterns = [
-    path('webhook/nelsius/', views.nelsius_webhook, name='nelsius_webhook'),
+    path('webhook/notchpay/', views.notchpay_webhook, name='notchpay_webhook'),
 ]

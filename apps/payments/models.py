@@ -3,7 +3,7 @@ from apps.orders.models import Order
 
 class Payment(models.Model):
     MODE_CHOICES = (
-        ('nelsius', 'Nelsius'),
+        ('notchpay', 'Notch Pay'),
         ('fashi', 'Fashi'),
         ('cash', 'Cash'), 
     )
